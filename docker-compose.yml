@@ -31,7 +31,7 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: ./api
@@ -47,7 +47,7 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
-    x-develop:
+    develop:
       watch:
         - action: rebuild
           path: ./ui

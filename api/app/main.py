@@ -1,8 +1,11 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
+from typing import List, Optional, Tuple
 
+from chat import agent_executor
 from fastapi import FastAPI, HTTPException
 from importing import get_articles, import_cypher_query, process_params
+from langserve import add_routes
 from processing import process_document, store_graph_documents
 from pydantic import BaseModel
 from utils import graph
@@ -58,6 +61,9 @@ def fetch_graph_data() -> int:
         "MATCH (a:Article) WHERE a.processed IS NULL RETURN count(a) AS output"
     )
     return data[0]["output"]
+
+
+add_routes(app, agent_executor, path="/chat")
 
 
 if __name__ == "__main__":
