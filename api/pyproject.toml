@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "movieagent"
+version = "0.1.0"
+description = ""
+authors = ["Tomaz Bratanic <tomaz.bratanic@neo4j.com>"]
+readme = "README.md"
+packages = [
+    { include = "app" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+uvicorn = "^0.23.2"
+langserve = {extras = ["server"], version = ">=0.0.30"}
+pydantic = "<2"
+langchain-community = "^0.0.36"
+langchain-core = "^0.1.50"
+neo4j = "^5.20.0"
+langchain-openai = "^0.1.6"
+langchain-text-splitters = "^0.0.1"
+tiktoken = "^0.6.0"
+langchain-experimental = "^0.0.57"
+
+
+[tool.poetry.group.dev.dependencies]
+langchain-cli = ">=0.0.15"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
