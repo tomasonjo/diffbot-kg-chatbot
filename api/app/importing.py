@@ -34,6 +34,7 @@ def process_params(data):
     for row in data["data"]:
         article = row["entity"]
         split_chunks = text_splitter.split_text(article["text"])
+        embedded_documents = embeddings.embed_documents(split_chunks)
         params.append(
             {
                 "sentiment": article["sentiment"],
@@ -60,8 +61,8 @@ def process_params(data):
                 "page_url": article["pageUrl"],
                 "id": article["id"],
                 "chunks": [
-                    {"text": el, "embedding": embeddings.embed_query(el), "index": i}
-                    for i, el in enumerate(split_chunks)
+                    {"text": el, "embedding": emb, "index": i}
+                    for i, (el, emb) in enumerate(zip(split_chunks, embedded_documents))
                 ],
             }
         )

@@ -1,6 +1,6 @@
+import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Tuple
 
 from chat import agent_executor
 from fastapi import FastAPI, HTTPException
@@ -9,6 +9,11 @@ from langserve import add_routes
 from processing import process_document, store_graph_documents
 from pydantic import BaseModel
 from utils import graph
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 MAX_WORKERS = min(os.cpu_count() * 5, 20)
 
@@ -22,7 +27,9 @@ class ArticleData(BaseModel):
 
 @app.post("/import_articles/")
 def import_articles_endpoint(article_data: ArticleData) -> int:
+    logging.info("Starting to process article import.")
     data = get_articles(article_data.query, article_data.size)
+    logging.info(f"Articles fetched: {len(data['data'])} articles.")
     try:
         params = process_params(data)
     except Exception as e:
@@ -31,6 +38,7 @@ def import_articles_endpoint(article_data: ArticleData) -> int:
             status_code=500, detail="Something went wrong during parameter processing."
         )
     graph.query(import_cypher_query, params={"data": params})
+    logging.info(f"Article import query executed successfully.")
     return len(params)
 
 

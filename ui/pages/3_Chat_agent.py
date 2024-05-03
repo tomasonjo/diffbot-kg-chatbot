@@ -7,7 +7,7 @@ from streamlit.logger import get_logger
 
 logger = get_logger(__name__)
 
-st.title("Movie agent")
+st.title("News chat agent")
 
 
 class StreamHandler:

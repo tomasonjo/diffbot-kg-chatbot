@@ -20,7 +20,7 @@ prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are a helpful assistant that finds information about movies "
+            "You are a helpful assistant that finds information about news "
             " and recommends them. If tools require follow up questions, "
             "make sure to ask the user for clarification. Make sure to include any "
             "available options that need to be clarified in the follow up questions "

@@ -1,13 +1,15 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Hello",
+    page_title="Diffbot + Neo4j GraphRAG",
     page_icon="👋",
 )
 
-st.write("# Welcome to Streamlit! 👋")
+st.write("# Neo4j and Diffbot GraphRAG demo!")
+_, col, _ = st.columns([1, 1, 1])
+col.write("# 🤖❤️🕸️")
 
-st.sidebar.success("Select a demo above.")
+st.sidebar.success("Follow the pages in sequence!.")
 
 st.markdown(
     """
