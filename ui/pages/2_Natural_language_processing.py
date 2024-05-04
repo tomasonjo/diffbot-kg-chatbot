@@ -49,12 +49,24 @@ if st.session_state.response_count == 0:
         f"#### **Articles that haven't been processed yet:** `{st.session_state.response_count}`"
     )
     st.text("")
-    st.button("Process with NLP API", disabled=True)
+    col1, col2 = st.columns([0.5, 1])
+    with col1:
+        st.button("Process with NLP API", disabled=True)
+    with col2:
+        if st.button("Refresh count", type="secondary"):
+            st.session_state.response_count = get_data_count()
+            st.rerun()
 else:
     st.markdown(
         f"#### **Articles that haven't been processed yet:** `{st.session_state.response_count}`"
     )
     st.text("")
-    if st.button("Process with NLP API", type="primary"):
-        with st.spinner("Processing articles."):
-            process_data()
+    col1, col2 = st.columns([0.5, 1])
+    with col1:
+        if st.button("Process with NLP API", type="primary"):
+            with st.spinner("Processing articles."):
+                process_data()
+    with col2:
+        if st.button("Refresh count", type="secondary"):
+            st.session_state.response_count = get_data_count()
+            st.rerun()

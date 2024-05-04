@@ -27,16 +27,14 @@ class ArticleData(BaseModel):
 
 @app.post("/import_articles/")
 def import_articles_endpoint(article_data: ArticleData) -> int:
-    logging.info("Starting to process article import.")
+    logging.info(f"Starting to process article import with params: {article_data}")
     data = get_articles(article_data.query, article_data.size)
     logging.info(f"Articles fetched: {len(data['data'])} articles.")
     try:
         params = process_params(data)
     except Exception as e:
         # You could log the exception here if needed
-        raise HTTPException(
-            status_code=500, detail="Something went wrong during parameter processing."
-        )
+        raise HTTPException(status_code=500, detail=e)
     graph.query(import_cypher_query, params={"data": params})
     logging.info(f"Article import query executed successfully.")
     return len(params)

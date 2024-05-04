@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List
 
@@ -31,10 +32,14 @@ def get_tag_type(types: List[str]) -> str:
 
 def process_params(data):
     params = []
+    all_chunks = []
     for row in data["data"]:
         article = row["entity"]
-        split_chunks = text_splitter.split_text(article["text"])
-        embedded_documents = embeddings.embed_documents(split_chunks)
+        split_chunks = [
+            {"text": el, "index": f"{article['id']}-{i}"}
+            for i, el in enumerate(text_splitter.split_text(article["text"][:5]))
+        ]
+        all_chunks.extend(split_chunks)
         params.append(
             {
                 "sentiment": article["sentiment"],
@@ -60,12 +65,21 @@ def process_params(data):
                 ],
                 "page_url": article["pageUrl"],
                 "id": article["id"],
-                "chunks": [
-                    {"text": el, "embedding": emb, "index": i}
-                    for i, (el, emb) in enumerate(zip(split_chunks, embedded_documents))
-                ],
+                "chunks": split_chunks,
             }
         )
+    logging.info(f"Number of text chunks: {len(all_chunks)}.")
+    # Make a single request for embeddings
+    embedded_documents = embeddings.embed_documents([el["text"] for el in all_chunks])
+    # Assign embeddings to chunks in params using a dictionary
+    chunk_embedding_map = {
+        chunk["index"]: embedded_documents[i] for i, chunk in enumerate(all_chunks)
+    }
+    for param in params:
+        param["chunks"] = [
+            {**chunk, "embedding": chunk_embedding_map.get(chunk["index"], None)}
+            for chunk in param["chunks"]
+        ]
 
     return params
 
@@ -96,7 +110,7 @@ FOREACH (i in CASE WHEN row.author IS NOT NULL THEN [1] ELSE [] END |
 )
 WITH a, row
 UNWIND row.chunks AS chunk 
-  MERGE (c:Chunk {id: row.id + '-' + chunk.index})
+  MERGE (c:Chunk {id: chunk.index})
   SET c.text = chunk.text,
       c.index = chunk.index
   MERGE (a)-[:HAS_CHUNK]->(c)

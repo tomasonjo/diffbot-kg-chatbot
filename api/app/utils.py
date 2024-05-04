@@ -42,4 +42,4 @@ text_splitter = TokenTextSplitter(
     chunk_overlap=50,
 )
 
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small", chunk_size=200)
