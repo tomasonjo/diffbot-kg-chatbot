@@ -6,7 +6,9 @@ from utils import graph
 
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
-diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=DIFF_TOKEN)
+diffbot_nlp = DiffbotGraphTransformer(
+    diffbot_api_key=DIFF_TOKEN, extract_types=["facts", "entities"]
+)
 
 
 def process_document(text):

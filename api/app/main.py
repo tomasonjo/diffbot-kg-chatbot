@@ -2,7 +2,7 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from chat import agent_executor
+from chat import chain
 from fastapi import FastAPI, HTTPException
 from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
@@ -69,7 +69,7 @@ def fetch_graph_data() -> int:
     return data[0]["output"]
 
 
-add_routes(app, agent_executor, path="/chat")
+add_routes(app, chain, path="/chat")
 
 
 if __name__ == "__main__":

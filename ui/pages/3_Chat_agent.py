@@ -9,6 +9,10 @@ logger = get_logger(__name__)
 
 st.title("News chat agent")
 
+with st.sidebar:
+    options = ["Vector", "Vector+KG"]
+    mode = st.radio("Select RAG mode", options, horizontal=True)
+
 
 class StreamHandler:
     def __init__(self, container, status, initial_text=""):
@@ -26,31 +30,32 @@ class StreamHandler:
             st.write(status_update)
 
 
-# Initialize chat history
-if "generated" not in st.session_state:
-    st.session_state["generated"] = []
-if "user_input" not in st.session_state:
-    st.session_state["user_input"] = []
+for o in options:
+    # Initialize chat history
+    if "generated_" + o not in st.session_state:
+        st.session_state[f"generated_{o}"] = []
+    if "user_input_" + o not in st.session_state:
+        st.session_state[f"user_input_{o}"] = []
 
 # Display user message in chat message container
-if st.session_state["generated"]:
-    size = len(st.session_state["generated"])
+if st.session_state[f"generated_{mode}"]:
+    size = len(st.session_state[f"generated_{mode}"])
     # Display only the last three exchanges
     for i in range(max(size - 3, 0), size):
         with st.chat_message("user"):
-            st.markdown(st.session_state["user_input"][i])
+            st.markdown(st.session_state[f"user_input_{mode}"][i])
         with st.chat_message("assistant"):
-            st.markdown(st.session_state["generated"][i])
+            st.markdown(st.session_state[f"generated_{mode}"][i])
 
 
 async def get_agent_response(
     input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
 ):
     url = "http://api:8000/chat/"
-    st.session_state["generated"].append("")
+    st.session_state[f"generated_{mode}"].append("")
     remote_runnable = RemoteRunnable(url)
     async for chunk in remote_runnable.astream_log(
-        {"input": input, "chat_history": chat_history}
+        {"question": input, "chat_history": chat_history, "mode": mode}
     ):
         log_entry = chunk.ops[0]
         value = log_entry.get("value")
@@ -58,19 +63,22 @@ async def get_agent_response(
             for step in value.get("steps"):
                 stream_handler.new_status(step["action"].log.strip("\n"))
         elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
-            st.session_state["generated"][-1] += value
+            st.session_state[f"generated_{mode}"][-1] += value
             stream_handler.new_token(value)
 
 
-def generate_history():
+def generate_history(mode):
     context = []
     # If any history exists
-    if st.session_state["generated"]:
+    if st.session_state[f"generated_{mode}"]:
         # Add the last three exchanges
-        size = len(st.session_state["generated"])
+        size = len(st.session_state[f"generated_{mode}"])
         for i in range(max(size - 3, 0), size):
             context.append(
-                (st.session_state["user_input"][i], st.session_state["generated"][i])
+                (
+                    st.session_state[f"user_input_{mode}"][i],
+                    st.session_state[f"generated_{mode}"][i],
+                )
             )
     return context
 
@@ -83,7 +91,7 @@ if prompt := st.chat_input("How can I help you today?"):
         status = st.status("Generating answer🤖")
         stream_handler = StreamHandler(st.empty(), status)
 
-    chat_history = generate_history()
+    chat_history = generate_history(mode=mode)
     # Create an event loop: this is needed to run asynchronous functions
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -93,4 +101,4 @@ if prompt := st.chat_input("How can I help you today?"):
     loop.close()
     status.update(label="Finished!", state="complete", expanded=False)
     # Add user message to chat history
-    st.session_state.user_input.append(prompt)
+    st.session_state[f"user_input_{mode}"].append(prompt)

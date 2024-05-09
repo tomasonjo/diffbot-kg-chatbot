@@ -37,7 +37,7 @@ def process_params(data):
         article = row["entity"]
         split_chunks = [
             {"text": el, "index": f"{article['id']}-{i}"}
-            for i, el in enumerate(text_splitter.split_text(article["text"][:5]))
+            for i, el in enumerate(text_splitter.split_text(article["text"])[:5])
         ]
         all_chunks.extend(split_chunks)
         params.append(

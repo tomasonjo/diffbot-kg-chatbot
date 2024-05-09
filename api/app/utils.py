@@ -10,7 +10,7 @@ entity_keyword_index = "entity"
 
 def setup_indices():
     graph.query(
-        f"CREATE FULLTEXT INDEX {entity_keyword_index} IF NOT EXISTS FOR (n:`_Entity_`) ON EACH [n.id]",
+        f"CREATE FULLTEXT INDEX {entity_keyword_index} IF NOT EXISTS FOR (n:`_Entity_`) ON EACH [n.name]",
     )
     graph.query(
         f"CREATE FULLTEXT INDEX {keyword_index_name} IF NOT EXISTS FOR (n:Chunk) ON EACH [n.text]",
@@ -27,10 +27,10 @@ def setup_indices():
 
 graph = Neo4jGraph(refresh_schema=False)
 
-setup_indices()
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small", chunk_size=200)
 
-vector = Neo4jVector.from_existing_index(
-    OpenAIEmbeddings(),
+vector_index = Neo4jVector.from_existing_index(
+    embeddings,
     graph=graph,
     index_name=index_name,
     keyword_index_name=keyword_index_name,
@@ -42,4 +42,10 @@ text_splitter = TokenTextSplitter(
     chunk_overlap=50,
 )
 
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small", chunk_size=200)
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+
+# Setup vector and keyword indices
+setup_indices()
