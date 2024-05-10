@@ -1,5 +1,8 @@
+from typing import List, Tuple
+
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import TokenTextSplitter
 
@@ -45,6 +48,14 @@ text_splitter = TokenTextSplitter(
 
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
+
+
+def _format_chat_history(chat_history: List[Tuple[str, str]]) -> List:
+    buffer = []
+    for human, ai in chat_history:
+        buffer.append(HumanMessage(content=human))
+        buffer.append(AIMessage(content=ai))
+    return buffer
 
 
 # Setup vector and keyword indices

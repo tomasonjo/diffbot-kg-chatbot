@@ -2,7 +2,6 @@ import logging
 from typing import List, Tuple
 
 from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
-from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -10,9 +9,14 @@ from langchain_core.prompts import (
 )
 from langchain_core.prompts.prompt import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.runnables import (
+    RunnableBranch,
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+)
 from langchain_openai import ChatOpenAI
-from utils import format_docs, graph, vector_index
+from utils import _format_chat_history, format_docs, graph, vector_index
 
 llm = ChatOpenAI(temperature=0, model="gpt-4-turbo", streaming=True)
 
@@ -25,10 +29,13 @@ Standalone question:"""  # noqa: E501
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(rewrite_template)
 
 # RAG answer synthesis prompt
-template = """Answer the question based only on the following context:
+template = """You are a helpful assistant that answers questions based on the provided context.
+Answer the question based only on the following context:
 <context>
 {context}
-</context>"""
+</context>
+If the context doesn't provide any helpful information, say that you don't know the answer.
+"""
 
 ANSWER_PROMPT = ChatPromptTemplate.from_messages(
     [
@@ -38,16 +45,21 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages(
     ]
 )
 
-
-def _format_chat_history(chat_history: List[Tuple[str, str]]) -> List:
-    buffer = []
-    for human, ai in chat_history:
-        buffer.append(HumanMessage(content=human))
-        buffer.append(AIMessage(content=ai))
-    return buffer
-
-
-query_rewrite_chain = CONDENSE_QUESTION_PROMPT | llm
+_search_query = RunnableBranch(
+    # If input includes chat_history, we condense it with the follow-up question
+    (
+        RunnableLambda(lambda x: bool(x.get("chat_history"))).with_config(
+            run_name="HasChatHistoryCheck"
+        ),  # Condense follow-up question and chat into a standalone_question
+        RunnablePassthrough.assign(
+            chat_history=lambda x: _format_chat_history(x["chat_history"])
+        )
+        | CONDENSE_QUESTION_PROMPT
+        | ChatOpenAI(temperature=0),
+    ),
+    # Else, we have no chat history, so just pass through the question
+    RunnableLambda(lambda x: x["question"]),
+)
 
 
 # Extract entities from text
@@ -127,12 +139,11 @@ def structured_retriever(question: str) -> str:
 
 
 def retriever(input) -> str:
+    print(input)
     # Rewrite query if needed
-    query = input.get("question")
-    # if input.get('chat_history'):
-    #    query = query_rewrite_chain.invoke({"question": query, "chat_history": input.get("chat_history")})
-    #    logging.info(f"Query rewritten to: {query}")
-
+    query = input.get("search_query")
+    if not isinstance(query, str):
+        query = query.content
     # Retrieve documents from vector index
     documents = format_docs(vector_index.similarity_search(query))
     if input.get("mode") == "Vector+KG":
@@ -152,6 +163,13 @@ chain = (
             "chat_history": lambda x: (
                 _format_chat_history(x["chat_history"]) if x.get("chat_history") else []
             ),
+            "search_query": _search_query,
+        }
+    )
+    | RunnableParallel(
+        {
+            "question": lambda x: x["question"],
+            "chat_history": lambda x: x["chat_history"],
             "context": retriever,
         }
     )

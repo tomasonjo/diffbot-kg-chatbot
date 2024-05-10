@@ -62,7 +62,7 @@ async def get_agent_response(
         if isinstance(value, dict) and isinstance(value.get("steps"), list):
             for step in value.get("steps"):
                 stream_handler.new_status(step["action"].log.strip("\n"))
-        elif isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
+        elif isinstance(value, str) and "StrOutputParser" in log_entry["path"]:
             st.session_state[f"generated_{mode}"][-1] += value
             stream_handler.new_token(value)
 
