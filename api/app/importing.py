@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import List, Optional
 
 import requests
 from utils import embeddings, text_splitter
@@ -11,14 +11,18 @@ params = []
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
 
-def get_articles(query: str, size: int = 5, offset: int = 0):
+def get_articles(
+    query: Optional[str], tag: Optional[str], size: int = 5, offset: int = 0
+):
     """
     Fetch relevant articles from Diffbot KG endpoint
     """
     search_host = "https://kg.diffbot.com/kg/v3/dql?"
-    search_query = (
-        f'query=type%3AArticle+text%3A"{query}"+strict%3Alanguage%3A"en"+sortBy%3Adate'
-    )
+    search_query = f'query=type%3AArticle+strict%3Alanguage%3A"en"+sortBy%3Adate'
+    if query:
+        search_query += f'+text%3A"{query}"'
+    if tag:
+        search_query += f'+tags.label%3A"{tag}"'
     url = f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
     return requests.get(url).json()
 

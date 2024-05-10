@@ -38,7 +38,11 @@ class CountData(BaseModel):
 @app.post("/import_articles/")
 def import_articles_endpoint(article_data: ArticleData) -> int:
     logging.info(f"Starting to process article import with params: {article_data}")
-    data = get_articles(article_data.query, article_data.size)
+    if not article_data.query and not article_data.tag:
+        raise HTTPException(
+            status_code=500, detail="Either `query` or `tag` must be provided"
+        )
+    data = get_articles(article_data.query, article_data.tag, article_data.size)
     logging.info(f"Articles fetched: {len(data['data'])} articles.")
     try:
         params = process_params(data)
