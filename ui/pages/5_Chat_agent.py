@@ -10,8 +10,13 @@ logger = get_logger(__name__)
 st.title("News chat agent")
 
 with st.sidebar:
-    options = ["Vector", "Vector+KG"]
-    mode = st.radio("Select RAG mode", options, horizontal=True)
+    options = [
+        "Basic Hybrid Search",
+        "Basic Hybrid+Node Neighborhood",
+        "Graph-based prefiltering",
+        "Text2Cypher",
+    ]
+    mode = st.radio("Select RAG mode", options)
 
 
 class StreamHandler:

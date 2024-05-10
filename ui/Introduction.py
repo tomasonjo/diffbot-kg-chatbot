@@ -9,8 +9,6 @@ st.write("# Neo4j and Diffbot GraphRAG demo!")
 _, col, _ = st.columns([1, 1, 1])
 col.write("# 🤖❤️🕸️")
 
-st.sidebar.success("Follow the pages in sequence!.")
-
 st.markdown(
     """
     Streamlit is an open-source app framework built specifically for

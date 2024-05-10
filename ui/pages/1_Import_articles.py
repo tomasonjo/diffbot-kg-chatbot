@@ -10,9 +10,11 @@ ARTICLE_URL = f"{BASE_URL}/import_articles/"
 
 # Streamlit interface
 st.title("Article Importer")
-st.subheader("Fill-in the company you are interested in!")
+st.subheader("Please choose a keyword or field!")
 # Input fields
-query = st.text_input("Query", value="Nvidia")
+query = st.text_input("Keyword or Company", placeholder="Nvidia")
+option = st.selectbox("Industry", (None, "LLM"))
+
 size = st.number_input("Number of articles", min_value=1, value=50)
 # Button to send the request
 if st.button("Import articles", type="primary"):
