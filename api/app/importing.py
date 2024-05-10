@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 from utils import embeddings, text_splitter
@@ -13,7 +13,7 @@ DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
 def get_articles(
     query: Optional[str], tag: Optional[str], size: int = 5, offset: int = 0
-):
+) -> Dict[str, Any]:
     """
     Fetch relevant articles from Diffbot KG endpoint
     """

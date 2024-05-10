@@ -3,10 +3,10 @@ import os
 import requests
 import streamlit as st
 
-BASE_URL = os.environ.get("BASE_API_URL", "http://127.0.0.1:8000")
+BASE_URL = os.environ.get("BASE_API_URL", "http://api:8000")
 # Setting up the URL of the FastAPI endpoint
 COUNT_URL = f"{BASE_URL}/unprocessed_count/"
-PROCESS_URL = f"{BASE_URL}/process_entities/"
+PROCESS_URL = f"{BASE_URL}/enhance_entities/"
 
 
 # Function to get data count
@@ -20,7 +20,7 @@ def get_data_count():
 
 # Function to process data
 def process_data():
-    response = requests.get(PROCESS_URL)
+    response = requests.post(PROCESS_URL, json={"size": size})
     if response.status_code == 200:
         # Invalidate the cache to fetch new count
         st.success("Articles processed successfully!")

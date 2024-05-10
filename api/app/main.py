@@ -1,38 +1,24 @@
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
 
+from api_types import ArticleData, CountData, EntityData
 from chat import chain
+from enhance import process_entities, store_enhanced_data
 from fastapi import FastAPI, HTTPException
 from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
 from processing import process_document, store_graph_documents
-from pydantic import BaseModel
 from utils import graph
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
+# Multithreading for Diffbot API
 MAX_WORKERS = min(os.cpu_count() * 5, 20)
 
 app = FastAPI()
-
-
-class ArticleData(BaseModel):
-    query: Optional[str]
-    tag: Optional[str]
-    size: int
-
-
-class EntityData(BaseModel):
-    size: int
-
-
-class CountData(BaseModel):
-    type: str
 
 
 @app.post("/import_articles/")
@@ -55,7 +41,7 @@ def import_articles_endpoint(article_data: ArticleData) -> int:
 
 
 @app.get("/process_articles/")
-def process_entities() -> bool:
+def process_articles() -> bool:
     texts = graph.query(
         "MATCH (a:Article) WHERE a.processed IS NULL RETURN a.id AS id, a.text AS text"
     )
@@ -64,7 +50,6 @@ def process_entities() -> bool:
         # Submitting all tasks and creating a list of future objects
         futures = [executor.submit(process_document, text) for text in texts]
 
-        # Using tqdm to track progress as each future completes
         for future in futures:
             graph_document = future.result()
             graph_documents.extend(graph_document)
@@ -95,19 +80,24 @@ def fetch_unprocessed_count(unprocess_count: CountData) -> int:
 def enhance_entities(entity_data: EntityData) -> bool:
     entities = graph.query(
         "MATCH (a:Person|Organization) WHERE a.processed IS NULL "
-        "RETURN a.id AS id LIMIT toInteger($limit)",
-        params={"limit": entity_data.limit},
+        "WITH a LIMIT toInteger($limit) "
+        "RETURN [el in labels(a) WHERE el <> '_Entity_' | el][0] "
+        "AS label, collect(a.name) AS entities",
+        params={"limit": entity_data.size},
     )
-    graph_documents = []
+    enhanced_data = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         # Submitting all tasks and creating a list of future objects
-        futures = [executor.submit(process_document, text) for text in texts]
+        for row in entities:
+            futures = [
+                executor.submit(process_entities, el, row["label"])
+                for el in row["entities"]
+            ]
 
-        # Using tqdm to track progress as each future completes
-        for future in futures:
-            graph_document = future.result()
-            graph_documents.extend(graph_document)
-    store_graph_documents(graph_documents)
+            for future in futures:
+                response = future.result()
+                enhanced_data.extend(response)
+    store_enhanced_data(enhanced_data)
     return True
 
 

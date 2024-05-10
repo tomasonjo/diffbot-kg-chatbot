@@ -3,7 +3,7 @@ import os
 import requests
 import streamlit as st
 
-BASE_URL = os.environ.get("BASE_API_URL", "http://127.0.0.1:8000")
+BASE_URL = os.environ.get("BASE_API_URL", "http://api:8000")
 # Setting up the URL of the FastAPI endpoint
 COUNT_URL = f"{BASE_URL}/unprocessed_entities/"
 PROCESS_URL = f"{BASE_URL}/process_entities/"
