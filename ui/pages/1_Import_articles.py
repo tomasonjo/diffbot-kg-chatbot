@@ -12,8 +12,20 @@ ARTICLE_URL = f"{BASE_URL}/import_articles/"
 st.title("Article Importer")
 st.subheader("Please choose a keyword or field!")
 # Input fields
-query = st.text_input("Keyword or Company", placeholder="Company")
-option = st.selectbox("Industry", (None, "LLM"))
+query = st.text_input("Keyword or Industry", placeholder="Company")
+option = st.selectbox(
+    "Industry",
+    (
+        None,
+        "LLM",
+        "artificial intellgence",
+        "natural language processing",
+        "Business",
+        "Business and Finance",
+        "Technology & Computing",
+        "Semantic Web",
+    ),
+)
 
 size = st.number_input("Number of articles", min_value=1, value=50)
 # Button to send the request

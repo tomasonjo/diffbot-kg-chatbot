@@ -96,7 +96,7 @@ def enhance_entities(entity_data: EntityData) -> bool:
 
             for future in futures:
                 response = future.result()
-                enhanced_data.extend(response)
+                enhanced_data.append(response)
     store_enhanced_data(enhanced_data)
     return True
 

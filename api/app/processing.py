@@ -45,6 +45,14 @@ CALL apoc.merge.relationship(source, row.type,
 RETURN count(*)
 """
 
+merge_entities = """
+MATCH (p:Organization|Person)
+WITH p.name AS name, collect(p) AS nodes
+WHERE size(nodes) > 1
+CALL apoc.refactor.mergeNodes(nodes) YIELD node
+RETURN count(*)
+"""
+
 
 def store_graph_documents(graph_documents):
     for document in graph_documents:
@@ -73,3 +81,5 @@ def store_graph_documents(graph_documents):
                 ]
             },
         )
+    # Merge duplicate entities
+    graph.query(merge_entities)

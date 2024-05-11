@@ -23,7 +23,7 @@ def process_data():
     response = requests.post(PROCESS_URL, json={"size": size})
     if response.status_code == 200:
         # Invalidate the cache to fetch new count
-        st.success("Articles processed successfully!")
+        st.success("Entities enhanced successfully!")
         # Refresh data
     else:
         st.error(f"Failed to process articles. Error: {response.text}")

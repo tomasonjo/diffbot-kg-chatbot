@@ -46,7 +46,7 @@ def process_params(data):
         all_chunks.extend(split_chunks)
         params.append(
             {
-                "sentiment": article["sentiment"],
+                "sentiment": article.get("sentiment", 0),
                 "date": int(article["date"]["timestamp"] / 1000),
                 "publisher_region": article.get("publisherRegion"),
                 "site_name": article["siteName"],

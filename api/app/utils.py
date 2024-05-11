@@ -13,6 +13,13 @@ entity_keyword_index = "entity"
 
 def setup_indices():
     graph.query(
+        "CREATE CONSTRAINT classification IF NOT EXISTS FOR (n:`Classification`) REQUIRE (n.name) IS UNIQUE;"
+    )
+
+    graph.query(
+        "CREATE INDEX entity_range IF NOT EXISTS FOR (n:`_Entity_`) ON (n.name);"
+    )
+    graph.query(
         f"CREATE FULLTEXT INDEX {entity_keyword_index} IF NOT EXISTS FOR (n:`_Entity_`) ON EACH [n.name]",
     )
     graph.query(
