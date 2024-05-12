@@ -1,7 +1,6 @@
 import logging
 from typing import List, Tuple
 
-from langchain_community.vectorstores.neo4j_vector import remove_lucene_chars
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -15,10 +14,15 @@ from langchain_core.runnables import (
     RunnableParallel,
     RunnablePassthrough,
 )
-from langchain_openai import ChatOpenAI
-from utils import _format_chat_history, format_docs, graph, vector_index
-
-llm = ChatOpenAI(temperature=0, model="gpt-4-turbo", streaming=True)
+from utils import (
+    _format_chat_history,
+    entity_chain,
+    format_docs,
+    generate_full_text_query,
+    graph,
+    llm,
+    vector_index,
+)
 
 # Condense a chat history and follow-up question into a standalone question
 rewrite_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
@@ -55,57 +59,11 @@ _search_query = RunnableBranch(
             chat_history=lambda x: _format_chat_history(x["chat_history"])
         )
         | CONDENSE_QUESTION_PROMPT
-        | ChatOpenAI(temperature=0),
+        | llm,
     ),
     # Else, we have no chat history, so just pass through the question
     RunnableLambda(lambda x: x["question"]),
 )
-
-
-# Extract entities from text
-class Entities(BaseModel):
-    """Identifying information about entities."""
-
-    names: List[str] = Field(
-        ...,
-        description="All the person, organization, or business entities that "
-        "appear in the text",
-    )
-
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            "You are extracting organization and person entities from the text.",
-        ),
-        (
-            "human",
-            "Use the given format to extract information from the following "
-            "input: {question}",
-        ),
-    ]
-)
-
-entity_chain = prompt | llm.with_structured_output(Entities)
-
-
-def generate_full_text_query(input: str) -> str:
-    """
-    Generate a full-text search query for a given input string.
-
-    This function constructs a query string suitable for a full-text search.
-    It processes the input string by splitting it into words and appending a
-    similarity threshold (~2 changed characters) to each word, then combines
-    them using the AND operator. Useful for mapping entities from user questions
-    to database values, and allows for some misspelings.
-    """
-    full_text_query = ""
-    words = [el for el in remove_lucene_chars(input).split() if el]
-    for word in words[:-1]:
-        full_text_query += f" {word}~2 AND"
-    full_text_query += f" {words[-1]}~2"
-    return full_text_query.strip()
 
 
 # Fulltext index query

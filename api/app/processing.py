@@ -27,7 +27,7 @@ MATCH (a:Article {id: $document.metadata.id})
 SET a.processed = True
 WITH a
 UNWIND $data AS row
-MERGE (source:`_Entity_` {id: row.id})
+MERGE (source:`__Entity__` {id: row.id})
 SET source += row.properties
 MERGE (a)-[:MENTIONS]->(source)
 WITH source, row
@@ -37,8 +37,8 @@ RETURN count(*)
 
 rel_import_query = """
 UNWIND $data AS row 
-MERGE (source:`_Entity_` {id: row.source})
-MERGE (target:`_Entity_` {id: row.target})
+MERGE (source:`__Entity__` {id: row.source})
+MERGE (target:`__Entity__` {id: row.target})
 WITH source, target, row
 CALL apoc.merge.relationship(source, row.type,
 {}, row.properties, target) YIELD rel

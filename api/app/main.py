@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException
 from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
 from processing import process_document, store_graph_documents
+from text2cypher import text2cypher_chain
 from utils import graph
 
 logging.basicConfig(
@@ -57,6 +58,12 @@ def process_articles() -> bool:
     return True
 
 
+@app.get("/refresh_schema/")
+def refresh_schema() -> bool:
+    graph.refresh_schema()
+    return True
+
+
 @app.post("/unprocessed_count/")
 def fetch_unprocessed_count(unprocess_count: CountData) -> int:
     """
@@ -102,7 +109,7 @@ def enhance_entities(entity_data: EntityData) -> bool:
 
 
 add_routes(app, chain, path="/chat")
-
+add_routes(app, text2cypher_chain, path="/text2cypher")
 
 if __name__ == "__main__":
     import uvicorn

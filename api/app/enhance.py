@@ -104,7 +104,7 @@ def get_organization_params(name: str, row: Dict) -> Dict:
 
 organization_import_query = """
 UNWIND $data AS row
-MERGE (o:`_Entity_` {name: row.name})
+MERGE (o:`__Entity__` {name: row.name})
 SET o += row.node_properties,
     o.processed = True
 WITH o, row
@@ -118,7 +118,7 @@ CALL {
     WITH o, row
     WITH o, row
     WHERE row.ceo IS NOT NULL
-    MERGE (c:`_Entity_` {name: row.ceo.name})
+    MERGE (c:`__Entity__` {name: row.ceo.name})
     ON CREATE SET c.id = row.ceo.name
     MERGE (o)-[:HAS_CEO]->(c)
     WITH c, row.ceo.type AS type
@@ -129,7 +129,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.subsidiaries AS subsidiary
-    MERGE (s:`_Entity_` {name: subsidiary.name})
+    MERGE (s:`__Entity__` {name: subsidiary.name})
     ON CREATE SET s.id = subsidiary.name
     MERGE (o)-[:HAS_SUBSIDIARY]->(s)
     WITH s, subsidiary
@@ -140,7 +140,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.board_members AS board_member
-    MERGE (s:`_Entity_` {name: board_member.name})
+    MERGE (s:`__Entity__` {name: board_member.name})
     ON CREATE SET s.id = board_member.name
     MERGE (o)-[:BOARD_MEMBER]->(s)
     WITH s, board_member
@@ -151,7 +151,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.partnerships AS partnership
-    MERGE (s:`_Entity_` {name: partnership.name})
+    MERGE (s:`__Entity__` {name: partnership.name})
     ON CREATE SET s.id = partnership.name
     MERGE (o)-[:PARTNERSHIP]->(s)
     WITH s, partnership
@@ -162,7 +162,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.founders AS founder
-    MERGE (s:`_Entity_` {name: founder.name})
+    MERGE (s:`__Entity__` {name: founder.name})
     ON CREATE SET s.id = founder.name
     MERGE (o)-[:HAS_FOUNDER]->(s)
     WITH s, founder
@@ -173,7 +173,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.competitors AS competitor
-    MERGE (s:`_Entity_` {name: competitor.name})
+    MERGE (s:`__Entity__` {name: competitor.name})
     ON CREATE SET s.id = competitor.name
     MERGE (o)-[:HAS_COMPETITOR]->(s)
     WITH s, competitor
@@ -184,7 +184,7 @@ WITH o, row
 CALL {
     WITH o, row
     UNWIND row.suppliers AS supplier
-    MERGE (s:`_Entity_` {name: supplier.name})
+    MERGE (s:`__Entity__` {name: supplier.name})
     ON CREATE SET s.id = supplier.name
     MERGE (o)-[:HAS_SUPPLIER]->(s)
     WITH s, supplier
@@ -201,7 +201,7 @@ CALL {
     MERGE (o)-[:HAS_INVESTMENT]->(is)
     WITH is, investment
     UNWIND investment.investors as investor
-    MERGE (es:`_Entity_` {name: investor.name})
+    MERGE (es:`__Entity__` {name: investor.name})
     ON CREATE SET es.id = investor.name
     MERGE (es)-[:HAS_INVESTED]->(is)
     WITH es, investor
@@ -214,7 +214,7 @@ RETURN count(*)
 
 no_data_processed_query = """
 UNWIND $data AS row
-MATCH (e:`_Entity_` {name: row})
+MATCH (e:`__Entity__` {name: row})
 SET e.processed = True;
 """
 
