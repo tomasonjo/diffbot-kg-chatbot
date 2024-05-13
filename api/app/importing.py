@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import requests
 from utils import embeddings, text_splitter
@@ -11,14 +11,18 @@ params = []
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
 
-def get_articles(query: str, size: int = 5, offset: int = 0):
+def get_articles(
+    query: Optional[str], tag: Optional[str], size: int = 5, offset: int = 0
+) -> Dict[str, Any]:
     """
     Fetch relevant articles from Diffbot KG endpoint
     """
     search_host = "https://kg.diffbot.com/kg/v3/dql?"
-    search_query = (
-        f'query=type%3AArticle+text%3A"{query}"+strict%3Alanguage%3A"en"+sortBy%3Adate'
-    )
+    search_query = f'query=type%3AArticle+strict%3Alanguage%3A"en"+sortBy%3Adate'
+    if query:
+        search_query += f'+text%3A"{query}"'
+    if tag:
+        search_query += f'+tags.label%3A"{tag}"'
     url = f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
     return requests.get(url).json()
 
@@ -37,12 +41,12 @@ def process_params(data):
         article = row["entity"]
         split_chunks = [
             {"text": el, "index": f"{article['id']}-{i}"}
-            for i, el in enumerate(text_splitter.split_text(article["text"][:5]))
+            for i, el in enumerate(text_splitter.split_text(article["text"])[:5])
         ]
         all_chunks.extend(split_chunks)
         params.append(
             {
-                "sentiment": article["sentiment"],
+                "sentiment": article.get("sentiment", 0),
                 "date": int(article["date"]["timestamp"] / 1000),
                 "publisher_region": article.get("publisherRegion"),
                 "site_name": article["siteName"],

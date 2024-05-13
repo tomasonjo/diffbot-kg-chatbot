@@ -6,7 +6,9 @@ from utils import graph
 
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
-diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=DIFF_TOKEN)
+diffbot_nlp = DiffbotGraphTransformer(
+    diffbot_api_key=DIFF_TOKEN, extract_types=["facts", "entities"]
+)
 
 
 def process_document(text):
@@ -25,7 +27,7 @@ MATCH (a:Article {id: $document.metadata.id})
 SET a.processed = True
 WITH a
 UNWIND $data AS row
-MERGE (source:`_Entity_` {id: row.id})
+MERGE (source:`__Entity__` {id: row.id})
 SET source += row.properties
 MERGE (a)-[:MENTIONS]->(source)
 WITH source, row
@@ -35,11 +37,19 @@ RETURN count(*)
 
 rel_import_query = """
 UNWIND $data AS row 
-MERGE (source:`_Entity_` {id: row.source})
-MERGE (target:`_Entity_` {id: row.target})
+MERGE (source:`__Entity__` {id: row.source})
+MERGE (target:`__Entity__` {id: row.target})
 WITH source, target, row
 CALL apoc.merge.relationship(source, row.type,
 {}, row.properties, target) YIELD rel
+RETURN count(*)
+"""
+
+merge_entities = """
+MATCH (p:Organization|Person)
+WITH p.name AS name, collect(p) AS nodes
+WHERE size(nodes) > 1
+CALL apoc.refactor.mergeNodes(nodes) YIELD node
 RETURN count(*)
 """
 
@@ -71,3 +81,5 @@ def store_graph_documents(graph_documents):
                 ]
             },
         )
+    # Merge duplicate entities
+    graph.query(merge_entities)
