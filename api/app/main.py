@@ -1,6 +1,7 @@
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict
 
 from api_types import ArticleData, CountData, EntityData
 from chat import chain
@@ -57,6 +58,34 @@ def process_articles() -> bool:
             graph_documents.extend(graph_document)
     store_graph_documents(graph_documents)
     return True
+
+
+@app.get("/dashboard/")
+def dashboard() -> Dict[str, Any]:
+    article_data = graph.query(
+        """MATCH (a:Article) RETURN count(*) AS article_count, 
+        [{sentiment: 'positive', count: sum(CASE WHEN a.sentiment > 0.5 THEN 1 ELSE 0 END)},
+         {sentiment: 'neutral', count: sum(CASE WHEN -0.5 < a.sentiment < 0.5 THEN 1 ELSE 0 END)},
+         {sentiment: 'negative', count: sum(CASE WHEN a.sentiment < -0.5 THEN 1 ELSE 0 END)}] AS sentiment
+        """
+    )
+    entity_types = graph.query(
+        """MATCH (e:`__Entity__`)
+        RETURN [l IN labels(e) WHERE l <> '__Entity__' | l][0] AS label,
+               count(*) AS count
+        ORDER BY count DESC LIMIT 7
+        """
+    )
+    entity_count = graph.query(
+        """
+    MATCH (e:`__Entity__`)
+    RETURN count(*) AS count
+    """
+    )
+    return {
+        "article": article_data[0],
+        "entity": {"types": entity_types, "count": entity_count[0]["count"]},
+    }
 
 
 @app.get("/refresh_schema/")
