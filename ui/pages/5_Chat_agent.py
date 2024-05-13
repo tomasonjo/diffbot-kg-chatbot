@@ -95,6 +95,25 @@ async def get_chat_response(
             stream_handler.new_token(value)
 
 
+async def get_prefiltering_response(
+    input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
+):
+    url = BASE_URL + "/prefiltering/"
+    st.session_state[f"generated_{mode}"].append("")
+    remote_runnable = RemoteRunnable(url)
+    async for chunk in remote_runnable.astream_log(
+        {"input": input, "chat_history": chat_history}
+    ):
+        log_entry = chunk.ops[0]
+        value = log_entry.get("value")
+        if isinstance(value, dict) and isinstance(value.get("steps"), list):
+            for step in value.get("steps"):
+                stream_handler.new_status(step["action"].log.strip("\n"))
+        if isinstance(value, str) and "ChatOpenAI" in log_entry["path"]:
+            st.session_state[f"generated_{mode}"][-1] += value
+            stream_handler.new_token(value)
+
+
 async def get_text2cypher_response(
     input: str, stream_handler: StreamHandler, chat_history: Optional[List[Tuple]] = []
 ):
@@ -102,7 +121,7 @@ async def get_text2cypher_response(
     st.session_state[f"generated_{mode}"].append("")
     remote_runnable = RemoteRunnable(url)
     async for chunk in remote_runnable.astream_log(
-        {"question": input, "chat_history": chat_history, "mode": mode}
+        {"question": input, "chat_history": chat_history}
     ):
         log_entry = chunk.ops[0]
         value = log_entry.get("value")
@@ -150,6 +169,10 @@ if prompt := st.chat_input("How can I help you today?"):
         # Run the asynchronous function within the event loop
         loop.run_until_complete(
             get_text2cypher_response(prompt, stream_handler, chat_history)
+        )
+    elif mode == "Graph-based prefiltering":
+        loop.run_until_complete(
+            get_prefiltering_response(prompt, stream_handler, chat_history)
         )
     else:
         # Run the asynchronous function within the event loop

@@ -6,6 +6,7 @@ from api_types import ArticleData, CountData, EntityData
 from chat import chain
 from enhance import process_entities, store_enhanced_data
 from fastapi import FastAPI, HTTPException
+from graph_prefiltering import prefiltering_agent_executor
 from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
 from processing import process_document, store_graph_documents
@@ -110,6 +111,8 @@ def enhance_entities(entity_data: EntityData) -> bool:
 
 add_routes(app, chain, path="/chat")
 add_routes(app, text2cypher_chain, path="/text2cypher")
+add_routes(app, prefiltering_agent_executor, path="/prefiltering")
+
 
 if __name__ == "__main__":
     import uvicorn
