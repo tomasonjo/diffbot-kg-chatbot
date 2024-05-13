@@ -40,9 +40,7 @@ def get_people_params(row: Dict) -> Optional[Dict]:
         return None
 
     node_properties = {
-        "education": row.get("educations", [{}])[0]
-        .get("institution", {})
-        .get("name", ""),
+        "education": row.get("educations", [{}])[0].get("institution", {}).get("name"),
         "wikipedia": row.get("wikipediaUri"),
         "description": row.get("description"),
         "summary": row.get("summary"),
@@ -57,12 +55,12 @@ def get_people_params(row: Dict) -> Optional[Dict]:
 
     locations = [
         {
-            "city": el.get("city", {}).get("name", ""),
-            "summary": el.get("city", {}).get("summary", ""),
-            "country": el.get("country", {}).get("name", ""),
+            "city": el.get("city", {}).get("name"),
+            "summary": el.get("city", {}).get("summary"),
+            "country": el.get("country", {}).get("name"),
         }
         for el in row.get("locations", [])
-        if el.get("city", {}).get("name", "")
+        if el.get("city", {}).get("name")
     ]
 
     nationalities = (
@@ -127,7 +125,12 @@ person_import_query = """
         UNWIND row.employments AS emp
         MERGE (org:Organization {name: emp.employer})
         WITH p, org, emp
-        CALL apoc.create.relationship(p, toUpper(emp.title), {isCurrent: emp.isCurrent, fromYear: emp.from, toYear: emp.to}, org) YIELD rel
+        CALL apoc.create.relationship(
+            p, toUpper(emp.title), 
+            {isCurrent: emp.isCurrent, fromYear: emp.from, toYear: emp.to}, 
+            org
+        )
+        YIELD rel
         RETURN count(*) AS employmentCount
     }
 
