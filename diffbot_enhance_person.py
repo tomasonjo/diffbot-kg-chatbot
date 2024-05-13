@@ -2,31 +2,47 @@ def get_people_params(row: Dict) -> Optional[Dict]:
     firstName = row.get("nameDetail", {}).get("firstName", "")
     lastName = row.get("nameDetail", {}).get("lastName", "")
     name = (firstName + " " + lastName).strip()
-    
+
     # Skip entries without a valid name
     if not name:
         return None
 
     node_properties = {
-        "education": row.get("educations", [{}])[0].get("institution", {}).get("name", ""),
+        "education": row.get("educations", [{}])[0]
+        .get("institution", {})
+        .get("name", ""),
         "wikipedia": row.get("wikipediaUri", {}),
         "description": row.get("description", {}),
         "summary": row.get("summary", {}),
-        "net_worth": (str(row.get("netWorth", {}).get('value', '')) + " " + row.get("netWorth", {}).get('currency', '')).strip(),
+        "net_worth": (
+            str(row.get("netWorth", {}).get("value", ""))
+            + " "
+            + row.get("netWorth", {}).get("currency", "")
+        ).strip(),
         "birth_date": row.get("birthDate", {}).get("str", "")[1:],
         "linkedin": row.get("linkedInUri", {}),
     }
 
     locations = [
-        {"city": el.get("city", {}).get("name", ""), "summary": el.get("city", {}).get("summary", ""), "country": el.get("country", {}).get("name", "")}
-        for el in row.get("locations", []) if el.get("city", {}).get("name", "")
+        {
+            "city": el.get("city", {}).get("name", ""),
+            "summary": el.get("city", {}).get("summary", ""),
+            "country": el.get("country", {}).get("name", ""),
+        }
+        for el in row.get("locations", [])
+        if el.get("city", {}).get("name", "")
     ]
 
-    nationalities = [{
-        "name": row["nationalities"][-1]["name"],
-        "type": row["nationalities"][-1].get("type", "Nationality")
-    }] if row.get("nationalities") and "name" in row["nationalities"][-1] else []
-
+    nationalities = (
+        [
+            {
+                "name": row["nationalities"][-1]["name"],
+                "type": row["nationalities"][-1].get("type", "Nationality"),
+            }
+        ]
+        if row.get("nationalities") and "name" in row["nationalities"][-1]
+        else []
+    )
 
     employments = [
         {
@@ -46,8 +62,9 @@ def get_people_params(row: Dict) -> Optional[Dict]:
         "node_properties": node_properties,
         "locations": locations,
         "nationalities": nationalities,
-        "employments": employments
+        "employments": employments,
     }
+
 
 def store_enhanced_data(data: List[Dict[str, Any]]) -> Dict:
     organizations = []
@@ -79,6 +96,7 @@ def store_enhanced_data(data: List[Dict[str, Any]]) -> Dict:
         graph.query(person_import_query, {"data": people})
 
     return {"organizations": len(organizations), "people": len(people)}
+
 
 person_import_query = """
     UNWIND $data AS row
