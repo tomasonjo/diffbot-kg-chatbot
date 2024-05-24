@@ -1,24 +1,14 @@
-FROM python:3.11-slim
-
-ENV PYTHONUNBUFFERED=1
+FROM node:20-alpine
 
 WORKDIR /app
+COPY package.json .
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
+RUN npm install
 
-COPY requirements.txt .
+COPY . .
 
-RUN pip install --upgrade -r requirements.txt
+RUN npm run build
 
-COPY Introduction.py .
-COPY /pages ./pages
+EXPOSE 8502
 
-EXPOSE 8501
-
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
-
-ENTRYPOINT ["streamlit", "run", "Introduction.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD [ "npm", "run", "preview" ]

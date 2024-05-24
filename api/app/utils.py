@@ -44,6 +44,9 @@ graph = Neo4jGraph(enhanced_schema=False, refresh_schema=True)
 
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
+# Setup vector and keyword indices
+setup_indices()
+
 vector_index = Neo4jVector.from_existing_index(
     embeddings,
     graph=graph,
@@ -114,7 +117,3 @@ def generate_full_text_query(input: str) -> str:
         full_text_query += f" {word}~2 AND"
     full_text_query += f" {words[-1]}~2"
     return full_text_query.strip()
-
-
-# Setup vector and keyword indices
-setup_indices()

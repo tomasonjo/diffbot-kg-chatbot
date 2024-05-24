@@ -25,9 +25,14 @@
     "8501": {
       "label": "Application",
       "onAutoForward": "openPreview"
+    },
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "openPreview"
     }
   },
   "forwardPorts": [
-    8501
+    8501,
+    3000
   ]
 }

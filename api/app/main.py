@@ -13,6 +13,7 @@ from langserve import add_routes
 from processing import process_document, store_graph_documents
 from text2cypher import text2cypher_chain
 from utils import graph
+from fastapi.middleware.cors import CORSMiddleware
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -22,6 +23,15 @@ logging.basicConfig(
 MAX_WORKERS = min(os.cpu_count() * 5, 20)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
 
 
 @app.post("/import_articles/")
@@ -63,7 +73,7 @@ def process_articles() -> bool:
 @app.get("/dashboard/")
 def dashboard() -> Dict[str, Any]:
     article_data = graph.query(
-        """MATCH (a:Article) RETURN count(*) AS article_count, 
+        """MATCH (a:Article) RETURN count(*) AS article_count,
         [{sentiment: 'positive', count: sum(CASE WHEN a.sentiment > 0.5 THEN 1 ELSE 0 END)},
          {sentiment: 'neutral', count: sum(CASE WHEN -0.5 < a.sentiment < 0.5 THEN 1 ELSE 0 END)},
          {sentiment: 'negative', count: sum(CASE WHEN a.sentiment < -0.5 THEN 1 ELSE 0 END)}] AS sentiment

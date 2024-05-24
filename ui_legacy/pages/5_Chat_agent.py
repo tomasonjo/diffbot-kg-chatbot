@@ -9,7 +9,7 @@ from streamlit.logger import get_logger
 
 logger = get_logger(__name__)
 
-BASE_URL = os.environ.get("BASE_API_URL", "http://api:8000")
+BASE_URL = os.environ.get("BASE_API_URL", "http://api:8000/")
 REFRESH_URL = BASE_URL + "/refresh_schema"
 
 st.title("News chat agent")
