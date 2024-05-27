@@ -1,5 +1,5 @@
+import { NaturalLanguageProcessing } from "../components/NaturalLanguageProcessing";
+
 export function NaturalLanguageProcessingPage() {
-    return (
-        <div>NaturalLanguageProcessingPage</div>
-    )
+  return <NaturalLanguageProcessing />;
 }

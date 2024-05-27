@@ -1,56 +1,39 @@
 import { z } from "zod";
 import { useForm, zodResolver } from "@mantine/form";
 import {
-  TextInput,
   Button,
   Group,
   NumberInput,
   Paper,
   Title,
   Box,
-  Select,
   Notification,
   rem,
 } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
-import { importArticles } from "../../api";
+import { enhanceEntities } from "../../api";
 import { FormEvent, useState } from "react";
 import { IconCheck, IconX } from "@tabler/icons-react";
 
-const INDUSTRY_OPTIONS = [
-  "LLM",
-  "Artificial intelligence",
-  "Natural language processing",
-  "Business",
-  "Business & finance",
-  "Technology & computing",
-  "Semantic web",
-];
-
 const schema = z.object({
-  query: z.string().min(2, { message: "Please enter a query." }),
-  tag: z.string(),
-  size: z.number().min(1, { message: "You must import at least one article." }),
+  size: z.number().min(1, { message: "Minimum 1 entity." }),
 });
 
-export function ImportArticles() {
+export function EnhanceEntities() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const form = useForm({
     validate: zodResolver(schema),
     initialValues: {
-      query: "",
-      tag: "",
-      size: 20,
+      size: 10,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: importArticles,
+    mutationFn: enhanceEntities,
     onSuccess: (import_count: number) => {
       console.log("import_count", import_count);
-      setSuccessMessage(`Successfully imported ${import_count} articles!`);
-      //queryClient.invalidateQueries({ queryKey: ['todos'] })
+      setSuccessMessage(`Successfully enhanced entities!`);
     },
   });
 
@@ -72,7 +55,7 @@ export function ImportArticles() {
     <Box p="lg">
       <Paper maw={640} mx="auto" shadow="xs" p="lg">
         <Title order={2} mb="xl">
-          Article Importer
+          Enhance entities
         </Title>
         {successMessage ? (
           <Notification
@@ -88,24 +71,9 @@ export function ImportArticles() {
         ) : (
           <>
             <Title order={3} mb="lg">
-              Please choose a keyword or field!
+              Entities that haven't been processed yet: {0}
             </Title>
             <form onSubmit={handleFormSubmit}>
-              <TextInput
-                withAsterisk
-                label="Keyword or Industry"
-                placeholder="Company"
-                key={form.key("query")}
-                {...form.getInputProps("query")}
-              />
-              <Select
-                label="Industry"
-                placeholder="Pick value"
-                data={INDUSTRY_OPTIONS}
-                key={form.key("tag")}
-                {...form.getInputProps("tag")}
-                mt="sm"
-              />
               <NumberInput
                 withAsterisk
                 label="Number of articles"
@@ -117,14 +85,7 @@ export function ImportArticles() {
               />
               {mutation.error && (
                 <Notification
-                  icon={
-                    <IconX
-                      style={{
-                        width: rem(20),
-                        height: rem(20),
-                      }}
-                    />
-                  }
+                  icon={<IconX style={{ width: rem(20), height: rem(20) }} />}
                   withBorder
                   color="red"
                   title="Error!"

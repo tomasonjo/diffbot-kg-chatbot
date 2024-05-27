@@ -1,5 +1,5 @@
+import { EnhanceEntities } from "../components/EnhanceEntities";
+
 export function EnhanceEntitiesPage() {
-    return (
-        <div>EnhanceEntitiesPage</div>
-    )
+  return <EnhanceEntities />;
 }

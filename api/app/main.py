@@ -66,6 +66,7 @@ def process_articles() -> bool:
         for future in futures:
             graph_document = future.result()
             graph_documents.extend(graph_document)
+    print("graph_documents", graph_documents)
     store_graph_documents(graph_documents)
     return True
 

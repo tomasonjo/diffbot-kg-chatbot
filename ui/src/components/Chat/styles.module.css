@@ -1,56 +1,56 @@
 .chat {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .output {
-    overflow-y: auto;
-    flex: 1;
-    padding: var(--mantine-spacing-xs);
+  overflow-y: auto;
+  flex: 1;
+  padding: var(--mantine-spacing-xs);
 }
 
 .outputText {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-self: flex-end;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-end;
 }
 
 .input {
-    flex: 0;
-    padding: var(--mantine-spacing-xs);
+  flex: 0;
+  padding: var(--mantine-spacing-xs);
 }
 
-.inputTextarea  {
-    position: relative;
-    max-width: 900px;
-    margin: 0 auto;
+.inputTextarea {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .inputAction {
-    position: absolute;
-    bottom: rem(6px);
-    right: rem(8px);
+  position: absolute;
+  bottom: rem(6px);
+  right: rem(8px);
 }
 
 .message {
-    position: relative;
-    display: flex;
-    margin-bottom: var(--mantine-spacing-lg);
+  position: relative;
+  display: flex;
+  margin-bottom: var(--mantine-spacing-lg);
 }
 
 .messageAvatar {
-    display: flex;
-    align-items: center;
-    flex: 0;
-    white-space: nowrap;
-    padding-right: var(--mantine-spacing-xs);
+  display: flex;
+  align-items: center;
+  flex: 0;
+  white-space: nowrap;
+  padding-right: var(--mantine-spacing-xs);
 }
 
 .messageText {
-    flex: 1;
-    padding-top: 7px;
+  flex: 1;
+  padding-top: 7px;
 }
