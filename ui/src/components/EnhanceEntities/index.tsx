@@ -6,6 +6,7 @@ import {
   NumberInput,
   Paper,
   Title,
+  Text,
   Box,
   Notification,
   rem,
@@ -54,7 +55,7 @@ export function EnhanceEntities() {
   return (
     <Box p="lg">
       <Paper maw={640} mx="auto" shadow="xs" p="lg">
-        <Title order={2} mb="xl">
+        <Title order={2} mb="lg">
           Enhance entities
         </Title>
         {successMessage ? (
@@ -70,9 +71,9 @@ export function EnhanceEntities() {
           </Notification>
         ) : (
           <>
-            <Title order={3} mb="lg">
-              Entities that haven't been processed yet: {0}
-            </Title>
+            <Text size="lg" mb="lg">
+              Entities that haven't been processed yet: <strong>{0}</strong>
+            </Text>
             <form onSubmit={handleFormSubmit}>
               <NumberInput
                 withAsterisk
@@ -95,7 +96,7 @@ export function EnhanceEntities() {
                 </Notification>
               )}
               <Group mt="lg">
-                <Button loading={mutation.isPending} type="submit">
+                <Button color="teal" loading={mutation.isPending} type="submit">
                   Submit
                 </Button>
               </Group>

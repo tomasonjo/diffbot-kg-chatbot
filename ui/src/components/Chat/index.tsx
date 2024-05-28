@@ -1,4 +1,4 @@
-import { ActionIcon, Textarea } from "@mantine/core";
+import { ActionIcon, Paper, Textarea } from "@mantine/core";
 import { IconMoodSmile, IconRobotFace, IconSend2 } from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
 
@@ -88,16 +88,18 @@ export function Chat() {
       <div className={styles.output}>
         <div className={styles.outputText}>
           {messages.map((message, index) => (
-            <div key={index} className={styles.message}>
-              <div className={styles.messageAvatar}>
-                {message.sender === "user" ? (
-                  <IconMoodSmile />
-                ) : (
-                  <IconRobotFace />
-                )}
+            <Paper key={index} mb="xs" p="xs">
+              <div className={styles.message}>
+                <div className={styles.messageAvatar}>
+                  {message.sender === "user" ? (
+                    <IconMoodSmile />
+                  ) : (
+                    <IconRobotFace />
+                  )}
+                </div>
+                <div className={styles.messageText}>{message.text}</div>
               </div>
-              <div className={styles.messageText}>{message.text}</div>
-            </div>
+            </Paper>
           ))}
         </div>
       </div>
@@ -119,6 +121,7 @@ export function Chat() {
               aria-label="Settings"
               size="lg"
               onClick={handleSubmit}
+              color="teal"
             >
               <IconSend2 style={{ width: "70%", height: "70%" }} stroke={1.5} />
             </ActionIcon>

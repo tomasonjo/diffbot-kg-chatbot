@@ -7,9 +7,10 @@ import {
   Box,
   Notification,
   rem,
+  ActionIcon,
 } from "@mantine/core";
 import { MouseEvent, useEffect, useState } from "react";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconRefresh, IconX } from "@tabler/icons-react";
 import { getUnprocessedArticles, processArticles } from "../../api/nlp";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -20,6 +21,7 @@ export function NaturalLanguageProcessing() {
   const queryUnprocessedArticles = useQuery({
     queryKey: ["unprocessed-articles"],
     queryFn: getUnprocessedArticles,
+    staleTime: 0,
   });
 
   const queryProcessArticles = useQuery({
@@ -33,6 +35,13 @@ export function NaturalLanguageProcessing() {
   ) => {
     event.preventDefault();
     queryProcessArticles.refetch();
+  };
+
+  const handleProcessedArticlesCountRefresh = (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+    queryUnprocessedArticles.refetch();
   };
 
   const handleNotificationClose = () => {
@@ -54,7 +63,7 @@ export function NaturalLanguageProcessing() {
   return (
     <Box p="lg">
       <Paper maw={640} mx="auto" shadow="xs" p="lg">
-        <Title order={2} mb="xl">
+        <Title order={2} mb="lg">
           Natural language processing
         </Title>
         {successMessage ? (
@@ -70,12 +79,28 @@ export function NaturalLanguageProcessing() {
           </Notification>
         ) : (
           <>
-            <Text mb="lg">
+            <Text size="lg" mb="lg">
               Articles that haven't been processed yet:{" "}
-              {queryUnprocessedArticles.isLoading
-                ? "..."
-                : queryUnprocessedArticles.data}
-              !
+              <strong>
+                {queryUnprocessedArticles.isLoading
+                  ? "..."
+                  : queryUnprocessedArticles.data}
+              </strong>
+              <ActionIcon
+                variant="outline"
+                color="teal"
+                aria-label="Refresh"
+                disabled={queryUnprocessedArticles.data === 0}
+                loading={queryUnprocessedArticles.isFetching}
+                onClick={handleProcessedArticlesCountRefresh}
+                title="Refresh counter"
+                ml="xs"
+              >
+                <IconRefresh
+                  style={{ width: "50%", height: "50%" }}
+                  stroke={1.5}
+                />
+              </ActionIcon>
             </Text>
             {queryProcessArticles.error && (
               <Notification
@@ -100,6 +125,7 @@ export function NaturalLanguageProcessing() {
                 disabled={queryUnprocessedArticles.data === 0}
                 loading={queryProcessArticles.isLoading}
                 type="button"
+                color="teal"
                 onClick={handleProcessArticlesSubmit}
               >
                 Process with NLP API

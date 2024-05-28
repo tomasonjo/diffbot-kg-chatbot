@@ -39,12 +39,10 @@
 .message {
   position: relative;
   display: flex;
-  margin-bottom: var(--mantine-spacing-lg);
 }
 
 .messageAvatar {
   display: flex;
-  align-items: center;
   flex: 0;
   white-space: nowrap;
   padding-right: var(--mantine-spacing-xs);
@@ -52,5 +50,5 @@
 
 .messageText {
   flex: 1;
-  padding-top: 7px;
+  padding-top: 3px;
 }

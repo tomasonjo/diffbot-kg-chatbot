@@ -9,7 +9,6 @@ export async function enhanceEntities(payload: EnhanceKnowledgeGraphPayload) {
     const response = await apiClient.post("/enhance_entities/", payload);
     return response.data;
   } catch (error) {
-    console.log(error)
-    throw error;
+    console.log(error);
   }
 }

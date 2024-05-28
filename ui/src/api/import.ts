@@ -11,7 +11,7 @@ export async function importArticles(payload: ImportArticlesPayload) {
     const response = await apiClient.post("/import_articles/", payload);
     return response.data;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     throw error;
   }
 }

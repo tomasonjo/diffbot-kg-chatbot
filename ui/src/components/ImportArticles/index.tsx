@@ -7,6 +7,7 @@ import {
   NumberInput,
   Paper,
   Title,
+  Text,
   Box,
   Select,
   Notification,
@@ -71,7 +72,7 @@ export function ImportArticles() {
   return (
     <Box p="lg">
       <Paper maw={640} mx="auto" shadow="xs" p="lg">
-        <Title order={2} mb="xl">
+        <Title order={2} mb="lg">
           Article Importer
         </Title>
         {successMessage ? (
@@ -87,9 +88,9 @@ export function ImportArticles() {
           </Notification>
         ) : (
           <>
-            <Title order={3} mb="lg">
+            <Text size="lg" mb="lg">
               Please choose a keyword or field!
-            </Title>
+            </Text>
             <form onSubmit={handleFormSubmit}>
               <TextInput
                 withAsterisk
@@ -134,7 +135,7 @@ export function ImportArticles() {
                 </Notification>
               )}
               <Group mt="lg">
-                <Button loading={mutation.isPending} type="submit">
+                <Button color="teal" loading={mutation.isPending} type="submit">
                   Submit
                 </Button>
               </Group>
