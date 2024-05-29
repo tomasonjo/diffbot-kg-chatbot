@@ -1,4 +1,4 @@
-import { Grid, Title, Text, Paper, Box } from "@mantine/core";
+import { Grid, Title, Text, Paper, Box, LoadingOverlay } from "@mantine/core";
 import { BarChart } from "@mantine/charts";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboard } from "../../api";
@@ -10,7 +10,13 @@ export function Dashboard() {
   });
 
   if (isLoading) {
-    return <>Loading</>;
+    return (
+      <LoadingOverlay
+        visible={isLoading}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+      />
+    );
   }
 
   if (error) {

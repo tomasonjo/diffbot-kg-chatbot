@@ -66,7 +66,6 @@ def process_articles() -> bool:
         for future in futures:
             graph_document = future.result()
             graph_documents.extend(graph_document)
-    print("graph_documents", graph_documents)
     store_graph_documents(graph_documents)
     return True
 
@@ -89,9 +88,9 @@ def dashboard() -> Dict[str, Any]:
     )
     entity_count = graph.query(
         """
-    MATCH (e:`__Entity__`)
-    RETURN count(*) AS count
-    """
+        MATCH (e:`__Entity__`)
+        RETURN count(*) AS count
+        """
     )
     return {
         "article": article_data[0],

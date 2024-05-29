@@ -1,4 +1,4 @@
-import { useMantineColorScheme } from "@mantine/core";
+import { useMantineColorScheme, Text, Title } from "@mantine/core";
 import { IconBrightness } from "@tabler/icons-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -50,7 +50,12 @@ export function Sidebar() {
       <div className={styles.links}>
         {links}
         {location.pathname.includes("/chat-agent/") && (
-          <RetrievalModeSelector />
+          <>
+            <Title order={5} pl="xs" mt="lg">
+              RAG Mode
+            </Title>
+            <RetrievalModeSelector />
+          </>
         )}
       </div>
       <div className={styles.toolbox}>

@@ -17,6 +17,13 @@
   display: flex;
   flex-direction: column;
   align-self: flex-end;
+
+  & .generatingIndicator {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: rem(5px);
+    margin-top: rem(2px);
+  }
 }
 
 .input {

@@ -1,4 +1,10 @@
-import { ActionIcon, Paper, Textarea } from "@mantine/core";
+import {
+  ActionIcon,
+  Notification,
+  Paper,
+  Skeleton,
+  Textarea,
+} from "@mantine/core";
 import { IconMoodSmile, IconRobotFace, IconSend2 } from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
 
@@ -12,6 +18,8 @@ import { getChatHistory } from "./utils";
 export function Chat() {
   const { retrievalMode } = globalStore();
   const [input, setInput] = useState("");
+  const [error, setError] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const handleSubmit = async () => {
@@ -23,6 +31,8 @@ export function Chat() {
     ]);
 
     setInput("");
+    setError("");
+    setIsGenerating(true);
 
     const mode = RETRIEVAL_MODES.find(({ name }) => name === retrievalMode);
 
@@ -31,14 +41,13 @@ export function Chat() {
     }
 
     try {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: "bot", text: "" },
+      ]);
+
       const remoteChain = new RemoteRunnable({
         url: `/api/${mode.endpoint}`,
-      });
-
-      console.log(mode, {
-        question: input,
-        chat_history: getChatHistory(messages, 3),
-        mode: mode.name,
       });
 
       const stream = await remoteChain.stream({
@@ -46,11 +55,6 @@ export function Chat() {
         chat_history: getChatHistory(messages, 3),
         mode: mode.name,
       });
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: "bot", text: "" },
-      ]);
 
       for await (const chunk of stream) {
         setMessages((prevMessages) => {
@@ -67,12 +71,9 @@ export function Chat() {
       }
     } catch (error) {
       console.error("Error invoking remote chain:", error);
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: "bot", text: "Error: Unable to get response" },
-      ]);
+      setError(`Error invoking remote chain: ${JSON.stringify(error)}`);
     }
+    setIsGenerating(false);
   };
 
   const handleTextareaInputChange = (
@@ -102,10 +103,31 @@ export function Chat() {
                     <IconRobotFace />
                   )}
                 </div>
-                <div className={styles.messageText}>{message.text}</div>
+                <div className={styles.messageText}>
+                  {message.text}
+                  {isGenerating &&
+                    message.sender === "bot" &&
+                    index === messages.length - 1 && (
+                      <Skeleton
+                        height={16}
+                        circle
+                        className={styles.generatingIndicator}
+                      />
+                    )}
+                </div>
               </div>
             </Paper>
           ))}
+          {error && (
+            <Notification
+              color="red"
+              title="Error!"
+              withCloseButton={false}
+              style={{ boxShadow: "none" }}
+            >
+              {JSON.stringify(error)}
+            </Notification>
+          )}
         </div>
       </div>
       <div className={styles.input}>
