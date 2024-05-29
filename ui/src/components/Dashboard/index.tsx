@@ -43,6 +43,16 @@ export function Dashboard() {
           series={[{ name: "count", color: "teal.6" }]}
           tickLine="x"
         />
+        <Title order={5} mt="lg" mb="lg">
+          Entity types
+        </Title>
+        <BarChart
+          h={300}
+          data={data.entity.types}
+          dataKey="label"
+          series={[{ name: "count", color: "teal.6" }]}
+          tickLine="x"
+        />
       </Paper>
     </Box>
   );

@@ -4,24 +4,13 @@ import { RemoteRunnable } from "@langchain/core/runnables/remote";
 
 import styles from "./styles.module.css";
 import { ChangeEvent, useState } from "react";
-
-const remoteChain = new RemoteRunnable({
-  url: "/api/chat",
-});
-
-interface ChatMessage {
-  sender: "user" | "bot";
-  text: string;
-}
-
-const RAG_MODE = [
-  "Basic Hybrid Search",
-  "Basic Hybrid+Node Neighborhood",
-  "Graph-based prefiltering",
-  "Text2Cypher",
-];
+import { globalStore } from "../../global/state";
+import { RETRIEVAL_MODES } from "../../global/constants";
+import { ChatMessage } from "./interfaces";
+import { getChatHistory } from "./utils";
 
 export function Chat() {
+  const { retrievalMode } = globalStore();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -35,11 +24,27 @@ export function Chat() {
 
     setInput("");
 
+    const mode = RETRIEVAL_MODES.find(({ name }) => name === retrievalMode);
+
+    if (!mode) {
+      throw new Error("Passed invalid retrieval mode.");
+    }
+
     try {
+      const remoteChain = new RemoteRunnable({
+        url: `/api/${mode.endpoint}`,
+      });
+
+      console.log(mode, {
+        question: input,
+        chat_history: getChatHistory(messages, 3),
+        mode: mode.name,
+      });
+
       const stream = await remoteChain.stream({
         question: input,
-        chat_history: [],
-        mode: RAG_MODE[0],
+        chat_history: getChatHistory(messages, 3),
+        mode: mode.name,
       });
 
       setMessages((prevMessages) => [

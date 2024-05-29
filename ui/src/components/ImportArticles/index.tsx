@@ -49,9 +49,7 @@ export function ImportArticles() {
   const mutation = useMutation({
     mutationFn: importArticles,
     onSuccess: (import_count: number) => {
-      console.log("import_count", import_count);
       setSuccessMessage(`Successfully imported ${import_count} articles!`);
-      //queryClient.invalidateQueries({ queryKey: ['todos'] })
     },
   });
 
@@ -94,8 +92,8 @@ export function ImportArticles() {
             <form onSubmit={handleFormSubmit}>
               <TextInput
                 withAsterisk
-                label="Keyword or Industry"
-                placeholder="Company"
+                label="Keyword or company"
+                placeholder="Neo4j inc"
                 key={form.key("query")}
                 {...form.getInputProps("query")}
               />
