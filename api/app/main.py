@@ -157,7 +157,7 @@ def fetch_network() -> Dict:
         """
 MATCH (a:Article)-[r]->(end)
 WITH a,r,end LIMIT 100
-WITH collect(distinct a) + collect(distinct end) AS nodes,
+WITH apoc.coll.toSet(collect(distinct a) + collect(distinct end)) AS nodes,
      collect(distinct r) AS rels
 RETURN {
     nodes: [n in nodes | 
