@@ -7,13 +7,13 @@ from api_types import ArticleData, CountData, EntityData
 from chat import chain
 from enhance import process_entities, store_enhanced_data
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from graph_prefiltering import prefiltering_agent_executor
 from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
 from processing import process_document, store_graph_documents
 from text2cypher import text2cypher_chain
 from utils import graph
-from fastapi.middleware.cors import CORSMiddleware
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -148,9 +148,44 @@ def enhance_entities(entity_data: EntityData) -> bool:
     return True
 
 
-add_routes(app, chain, path="/chat")
-add_routes(app, text2cypher_chain, path="/text2cypher")
-add_routes(app, prefiltering_agent_executor, path="/prefiltering")
+@app.get("/fetch_network/")
+def fetch_network() -> Dict:
+    """
+    Fetches data for network visualization
+    """
+    data = graph.query(
+        """
+MATCH (a:Article)-[r]->(end)
+WITH a,r,end LIMIT 100
+WITH collect(distinct a) + collect(distinct end) AS nodes,
+     collect(distinct r) AS rels
+RETURN {
+    nodes: [n in nodes | 
+                {
+                    id: coalesce(n.title, n.name, n.id), 
+                    labels: [el in labels(n) WHERE el <> "__Entity__"| el][0]
+                }],
+    relationships: [r in rels | 
+                    {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id), 
+                     end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id), 
+                     type:type(r)
+                    }]
+} AS output
+"""
+    )
+    return data[0]["output"]
+
+
+add_routes(app, chain, path="/chat", enabled_endpoints=["stream_log"])
+add_routes(
+    app, text2cypher_chain, path="/text2cypher", enabled_endpoints=["stream_log"]
+)
+add_routes(
+    app,
+    prefiltering_agent_executor,
+    path="/prefiltering",
+    enabled_endpoints=["stream_log"],
+)
 
 
 if __name__ == "__main__":
