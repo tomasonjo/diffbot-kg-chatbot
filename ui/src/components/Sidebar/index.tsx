@@ -1,5 +1,5 @@
 import { useMantineColorScheme, Title } from "@mantine/core";
-import { IconBrightness } from "@tabler/icons-react";
+import { IconAffiliate, IconBrightness } from "@tabler/icons-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   IconBulb,
@@ -24,6 +24,7 @@ const MAIN_MENU_LINKS = [
   },
   { link: "/enhance-entities/", label: "Enhance entities", icon: IconCube },
   { link: "/chat-agent/", label: "Chat agent", icon: IconMessages },
+  { link: "/network-graph/", label: "Network graph", icon: IconAffiliate },
 ];
 
 export function Sidebar() {

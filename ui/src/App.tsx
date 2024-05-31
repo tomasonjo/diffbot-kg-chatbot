@@ -11,6 +11,7 @@ import { EnhanceEntitiesPage } from "./pages/EnhanceEntitiesPage";
 import { NaturalLanguageProcessingPage } from "./pages/NaturalLanguageProcessingPage";
 import { MantineProvider, createTheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NetworkGraph } from "./components/NetworkGraph";
 
 const theme = createTheme({
   components: {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "natural-language-processing/",
         element: <NaturalLanguageProcessingPage />,
+      },
+      {
+        path: "network-graph/",
+        element: <NetworkGraph />,
       },
     ],
   },
