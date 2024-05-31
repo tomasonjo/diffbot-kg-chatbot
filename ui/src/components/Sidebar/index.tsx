@@ -1,4 +1,4 @@
-import { useMantineColorScheme, Text, Title } from "@mantine/core";
+import { useMantineColorScheme, Title } from "@mantine/core";
 import { IconBrightness } from "@tabler/icons-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
