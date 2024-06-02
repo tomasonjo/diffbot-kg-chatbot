@@ -1,57 +1,36 @@
-import { useQuery } from "@tanstack/react-query";
-import Graph from "graphology";
 import { useEffect } from "react";
-import Sigma from "sigma";
-import { random } from "graphology-layout";
-import { getNetwork } from "../../api/network";
+import { SigmaContainer } from "@react-sigma/core";
+import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
+import { NetworkGraph } from "./graph";
 
-export function NetworkGraph() {
-  const query = useQuery({
-    queryKey: ["network"],
-    queryFn: getNetwork,
+import "@react-sigma/core/lib/react-sigma.min.css";
+
+const Fa2 = () => {
+  const { start, kill } = useWorkerLayoutForceAtlas2({
+    settings: { slowDown: 10 },
   });
 
   useEffect(() => {
-    if (query.data) {
-      const graph = new Graph();
+    // start FA2
+    start();
 
-      for (const node of query.data.nodes) {
-        try {
-          console.log("node", node);
-          graph.addNode(node.id, {
-            label: node.id,
-            size: 15,
-            color: "blue",
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      }
+    // Kill FA2 on unmount
+    return () => {
+      kill();
+    };
+  }, [start, kill]);
 
-      random.assign(graph);
+  return null;
+};
 
-      for (const relationship of query.data.relationships) {
-        try {
-          graph.addEdge(relationship.start, relationship.end, {
-            size: relationship.label,
-          });
-        } catch (err) {
-          console.log(err);
-        }
-      }
-
-      const renderer = new Sigma(
-        graph,
-        document.getElementById("networkGraph") as HTMLDivElement,
-        {
-          renderEdgeLabels: true,
-          labelDensity: 0.1, // Adjust this for better label visibility
-          labelGridCellSize: 30, // Adjust this for better label visibility
-          defaultNodeColor: "#000", // Ensure label text color is visibl
-        },
-      );
-    }
-  }, [query.data]);
-
-  return <div id="networkGraph" style={{ height: "100%" }}></div>;
+export function Neo4jNetworkGraph() {
+  return (
+    <SigmaContainer
+      style={{ height: "100%" }}
+      settings={{ allowInvalidContainer: true }}
+    >
+      <NetworkGraph />
+      <Fa2 />
+    </SigmaContainer>
+  );
 }
