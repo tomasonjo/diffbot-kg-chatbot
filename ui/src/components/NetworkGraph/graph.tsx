@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getNetwork } from "../../api/network";
 import Graph from "graphology";
 import { Attributes } from "graphology-types";
+import { String2HexCodeColor } from "string-to-hex-code-color";
 
 export type NodeType = {
   x: number;
@@ -38,13 +39,14 @@ export const NetworkGraph = () => {
     // Create & load the graph on
     if (query.data) {
       const graph = new Graph();
+      const string2HexCodeColor = new String2HexCodeColor();
 
       for (const node of query.data.nodes) {
         try {
           graph.addNode(node.id, {
             label: node.id,
             size: 10,
-            color: "teal",
+            color: string2HexCodeColor.stringToColor(node.labels),
             x: Math.random(),
             y: Math.random(),
           });
@@ -84,6 +86,7 @@ export const NetworkGraph = () => {
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
         const newData = { ...data, highlighted: data.highlighted || false };
+        console.log(newData);
         if (hoveredNode) {
           if (
             node === hoveredNode ||
