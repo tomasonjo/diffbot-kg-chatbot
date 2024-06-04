@@ -15,16 +15,16 @@ import { RetrievalModeSelector } from "../Chat/components/RetrievalModeSelector"
 
 const MAIN_MENU_LINKS = [
   { link: "/", label: "Introduction", icon: IconBulb },
+  { link: "/enhance-entities/", label: "Enhance entities", icon: IconCube },
   { link: "/dashboard/", label: "Dashboard", icon: IconDashboard },
+  { link: "/network-graph/", label: "Network graph", icon: IconAffiliate },
   { link: "/import-articles/", label: "Import articles", icon: IconFileImport },
   {
     link: "/natural-language-processing/",
     label: "Natural language processing",
     icon: IconMessageLanguage,
   },
-  { link: "/enhance-entities/", label: "Enhance entities", icon: IconCube },
   { link: "/chat-agent/", label: "Chat agent", icon: IconMessages },
-  { link: "/network-graph/", label: "Network graph", icon: IconAffiliate },
 ];
 
 export function Sidebar() {
