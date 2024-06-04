@@ -17,14 +17,17 @@ def get_articles(
     """
     Fetch relevant articles from Diffbot KG endpoint
     """
-    search_host = "https://kg.diffbot.com/kg/v3/dql?"
-    search_query = f'query=type%3AArticle+strict%3Alanguage%3A"en"+sortBy%3Adate'
-    if query:
-        search_query += f'+text%3A"{query}"'
-    if tag:
-        search_query += f'+tags.label%3A"{tag}"'
-    url = f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
-    return requests.get(url).json()
+    try:
+        search_host = "https://kg.diffbot.com/kg/v3/dql?"
+        search_query = f'query=type%3AArticle+strict%3Alanguage%3A"en"+sortBy%3Adate'
+        if query:
+            search_query += f'+text%3A"{query}"'
+        if tag:
+            search_query += f'+tags.label%3A"{tag}"'
+        url = f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
+        return requests.get(url).json()
+    except Exception as ex:
+        raise ex
 
 
 def get_tag_type(types: List[str]) -> str:
@@ -100,20 +103,20 @@ SET a.sentiment = toFloat(row.sentiment),
 MERGE (s:Site {name: row.site_name})
 ON CREATE SET s.publisherRegion = row.publisher_region
 MERGE (a)-[:ON_SITE]->(s)
-FOREACH (category in row.category | 
+FOREACH (category in row.category |
   MERGE (c:Category {name: category}) MERGE (a)-[:IN_CATEGORY]->(c)
 )
-FOREACH (tag in row.tags | 
+FOREACH (tag in row.tags |
   MERGE (t:Tag {name: tag.name})
   MERGE (a)-[:HAS_TAG {sentiment: tag.sentiment}]->(t)
 )
-FOREACH (i in CASE WHEN row.author IS NOT NULL THEN [1] ELSE [] END | 
+FOREACH (i in CASE WHEN row.author IS NOT NULL THEN [1] ELSE [] END |
   MERGE (au:Author {name: row.author})
   MERGE (a)-[:HAS_AUTHOR]->(au)
   MERGE (au)-[:WRITES_FOR]->(s)
 )
 WITH a, row
-UNWIND row.chunks AS chunk 
+UNWIND row.chunks AS chunk
   MERGE (c:Chunk {id: chunk.index})
   SET c.text = chunk.text,
       c.index = chunk.index

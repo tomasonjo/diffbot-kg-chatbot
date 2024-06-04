@@ -10,9 +10,10 @@ import {
   Box,
   Notification,
   rem,
+  Loader,
 } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
-import { enhanceEntities } from "../../api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { enhanceEntities, getUnprocessedEntities } from "../../api";
 import { FormEvent, useState } from "react";
 import { IconCheck, IconX } from "@tabler/icons-react";
 
@@ -23,6 +24,11 @@ const schema = z.object({
 export function EnhanceEntities() {
   const [successMessage, setSuccessMessage] = useState("");
 
+  const unprocessedEntitiesQuery = useQuery({
+    queryKey: ["unprocessed_entities"],
+    queryFn: () => getUnprocessedEntities({ type: "entities" }),
+  });
+
   const form = useForm({
     validate: zodResolver(schema),
     initialValues: {
@@ -32,9 +38,9 @@ export function EnhanceEntities() {
 
   const mutation = useMutation({
     mutationFn: enhanceEntities,
-    onSuccess: (import_count: number) => {
-      console.log("import_count", import_count);
-      setSuccessMessage(`Successfully enhanced entities!`);
+    onSuccess: (message: string) => {
+      setSuccessMessage(message);
+      unprocessedEntitiesQuery.refetch();
     },
   });
 
@@ -61,8 +67,8 @@ export function EnhanceEntities() {
         {successMessage ? (
           <Notification
             icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}
-            color="teal"
-            title="Done!"
+            color="gray"
+            title="Processing completed."
             mt="md"
             withBorder
             onClose={handleNotificationClose}
@@ -72,12 +78,26 @@ export function EnhanceEntities() {
         ) : (
           <>
             <Text size="lg" mb="lg">
-              Entities that haven't been processed yet: <strong>{0}</strong>
+              Entities that haven't been processed yet:{" "}
+              <strong>
+                {unprocessedEntitiesQuery.isLoading ? (
+                  <Loader
+                    color="blue"
+                    size="xs"
+                    type="dots"
+                    style={{ display: "inline-flex" }}
+                  />
+                ) : unprocessedEntitiesQuery.error ? (
+                  "unknown"
+                ) : (
+                  unprocessedEntitiesQuery.data
+                )}
+              </strong>
             </Text>
             <form onSubmit={handleFormSubmit}>
               <NumberInput
                 withAsterisk
-                label="Number of articles"
+                label="Number of entities to enhance"
                 mt="sm"
                 min={1}
                 max={99}

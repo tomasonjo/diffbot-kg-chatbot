@@ -105,15 +105,15 @@ def refresh_schema() -> bool:
 
 
 @app.post("/unprocessed_count/")
-def fetch_unprocessed_count(unprocess_count: CountData) -> int:
+def fetch_unprocessed_count(count_data: CountData) -> int:
     """
     Fetches number of articles that haven't been processed yet.
     """
-    if unprocess_count.type == "articles":
+    if count_data.type == "articles":
         data = graph.query(
             "MATCH (a:Article) WHERE a.processed IS NULL RETURN count(a) AS output"
         )
-    elif unprocess_count.type == "entities":
+    elif count_data.type == "entities":
         data = graph.query(
             "MATCH (a:Person|Organization) WHERE a.processed IS NULL RETURN count(a) AS output"
         )
@@ -160,14 +160,14 @@ WITH a,r,end LIMIT 100
 WITH apoc.coll.toSet(collect(distinct a) + collect(distinct end)) AS nodes,
      collect(distinct r) AS rels
 RETURN {
-    nodes: [n in nodes | 
+    nodes: [n in nodes |
                 {
-                    id: coalesce(n.title, n.name, n.id), 
+                    id: coalesce(n.title, n.name, n.id),
                     labels: [el in labels(n) WHERE el <> "__Entity__"| el][0]
                 }],
-    relationships: [r in rels | 
-                    {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id), 
-                     end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id), 
+    relationships: [r in rels |
+                    {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id),
+                     end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id),
                      type:type(r)
                     }]
 } AS output
