@@ -1,8 +1,8 @@
 import { apiClient } from "./axios";
 
-export async function getDashboard() {
+export async function refreshSchema() {
   try {
-    const response = await apiClient.get("/dashboard/");
+    const response = await apiClient.get("/refresh_schema/");
     return response.data;
   } catch (error) {
     console.log(error);

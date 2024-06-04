@@ -45,7 +45,7 @@ services:
     build:
       context: ./ui
     environment:
-      - BASE_API_URL=${BASE_API_URL-http://api:8000}
+      - VITE_API_BASE_URL=${BASE_API_URL-http://api:8000}
     networks:
       - net
     depends_on:
@@ -57,21 +57,21 @@ services:
           path: ./ui
     ports:
       - 8502:8502
-  ui-legacy:
-    build:
-      context: ./ui_legacy
-    environment:
-      - BASE_API_URL=${BASE_API_URL-http://api:8000}
-    networks:
-      - net
-    depends_on:
-      neo4j:
-        condition: service_healthy
-    develop:
-      watch:
-        - action: rebuild
-          path: ./ui_legacy
-    ports:
-      - 8501:8501
+  # ui-legacy:
+  #   build:
+  #     context: ./ui_legacy
+  #   environment:
+  #     - BASE_API_URL=${BASE_API_URL-http://api:8000}
+  #   networks:
+  #     - net
+  #   depends_on:
+  #     neo4j:
+  #       condition: service_healthy
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./ui_legacy
+  #   ports:
+  #     - 8501:8501
 networks:
   net:

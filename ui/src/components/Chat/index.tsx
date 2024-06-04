@@ -47,23 +47,41 @@ export function Chat() {
       ]);
 
       const remoteChain = new RemoteRunnable({
-        url: `/api/${mode.endpoint}`,
+        url: `${import.meta.env.VITE_API_BASE_URL}/${mode.endpoint}`,
       });
 
-      const stream = await remoteChain.stream({
+      const stream = await remoteChain.streamLog({
         question: input,
         chat_history: getChatHistory(messages, 3),
         mode: mode.name,
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let currentOutput: any;
+
       for await (const chunk of stream) {
+        if (!currentOutput) {
+          currentOutput = chunk;
+        } else {
+          currentOutput = currentOutput.concat(chunk);
+        }
+
+        console.log("currentOutput", currentOutput.state);
+
         setMessages((prevMessages) => {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];
 
+          const newMessage =
+            currentOutput &&
+            currentOutput.state &&
+            currentOutput.state.final_output
+              ? currentOutput.state.final_output
+              : "";
+
           newMessages[newMessages.length - 1] = {
             ...lastMessage,
-            text: lastMessage.text + chunk,
+            text: newMessage,
           };
 
           return newMessages;
