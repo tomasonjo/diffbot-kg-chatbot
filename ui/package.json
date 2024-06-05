@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@langchain/core": "^0.2.0",
-    "@mantine/charts": "^7.10.0",
+    "@mantine/charts": "^7.10.1",
     "@mantine/core": "^7.9.2",
     "@mantine/form": "^7.9.2",
     "@mantine/hooks": "^7.9.2",
@@ -29,6 +29,7 @@
     "react-dom": "^18.2.0",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
+    "recharts": "^2.12.7",
     "sigma": "^3.0.0-beta.19",
     "string-to-hex-code-color": "^1.0.8",
     "zod": "^3.23.8",
