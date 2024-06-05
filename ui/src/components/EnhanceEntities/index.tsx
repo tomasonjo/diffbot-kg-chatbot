@@ -26,7 +26,7 @@ export function EnhanceEntities() {
 
   const unprocessedEntitiesQuery = useQuery({
     queryKey: ["unprocessed_entities"],
-    queryFn: () => getUnprocessedEntities({ type: "entities" }),
+    queryFn: getUnprocessedEntities,
   });
 
   const form = useForm({

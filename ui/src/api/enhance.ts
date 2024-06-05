@@ -1,19 +1,14 @@
 import { apiClient } from "./axios";
 
-interface UnprocessedEntitiesPayload {
-  type: string;
-}
-
 interface EnhanceKnowledgeGraphPayload {
   size: number;
 }
 
-export async function getUnprocessedEntities(
-  payload: UnprocessedEntitiesPayload,
-) {
+export async function getUnprocessedEntities() {
   try {
-    const response = await apiClient.post("/unprocessed_count/", payload);
-
+    const response = await apiClient.post("/unprocessed_count/", {
+      type: "entities",
+    });
     return response.data;
   } catch (error) {
     console.log(error);

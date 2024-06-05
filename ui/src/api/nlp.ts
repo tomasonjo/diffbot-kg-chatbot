@@ -3,7 +3,7 @@ import { apiClient } from "./axios";
 export async function getUnprocessedArticles() {
   try {
     const response = await apiClient.post("/unprocessed_count/", {
-      type: "entities",
+      type: "articles",
     });
     return response.data;
   } catch (error) {

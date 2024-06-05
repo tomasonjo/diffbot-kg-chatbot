@@ -124,7 +124,7 @@ def fetch_unprocessed_count(count_data: CountData) -> int:
 
 
 @app.post("/enhance_entities/")
-def enhance_entities(entity_data: EntityData) -> bool:
+def enhance_entities(entity_data: EntityData) -> str:
     entities = graph.query(
         "MATCH (a:Person|Organization) WHERE a.processed IS NULL "
         "WITH a LIMIT toInteger($limit) "
@@ -145,7 +145,7 @@ def enhance_entities(entity_data: EntityData) -> bool:
                 response = future.result()
                 enhanced_data.append(response)
     store_enhanced_data(enhanced_data)
-    return True
+    return "Finished enhancing entities."
 
 
 @app.get("/fetch_network/")
