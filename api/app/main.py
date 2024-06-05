@@ -53,8 +53,8 @@ def import_articles_endpoint(article_data: ArticleData) -> int:
     return len(params)
 
 
-@app.get("/process_articles/")
-def process_articles() -> bool:
+@app.post("/process_articles/")
+def process_articles() -> str:
     texts = graph.query(
         "MATCH (a:Article) WHERE a.processed IS NULL RETURN a.id AS id, a.text AS text"
     )
@@ -67,7 +67,7 @@ def process_articles() -> bool:
             graph_document = future.result()
             graph_documents.extend(graph_document)
     store_graph_documents(graph_documents)
-    return True
+    return f"Processed {len(graph_documents)} articles."
 
 
 @app.get("/dashboard/")

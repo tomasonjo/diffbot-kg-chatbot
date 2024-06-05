@@ -87,6 +87,7 @@ export function ImportArticles() {
             title="Done!"
             mt="md"
             withBorder
+            style={{ boxShadow: "none" }}
             onClose={handleNotificationClose}
           >
             {successMessage}

@@ -8,11 +8,12 @@ import {
   Notification,
   rem,
   ActionIcon,
+  LoadingOverlay,
 } from "@mantine/core";
-import { MouseEvent, useEffect, useState } from "react";
+import { FormEvent, MouseEvent, useState } from "react";
 import { IconCheck, IconRefresh, IconX } from "@tabler/icons-react";
 import { getUnprocessedArticles, processArticles } from "../../api/nlp";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function NaturalLanguageProcessing() {
   const queryClient = useQueryClient();
@@ -25,17 +26,23 @@ export function NaturalLanguageProcessing() {
     staleTime: 0,
   });
 
-  const queryProcessArticles = useQuery({
-    queryKey: ["process-articles"],
-    queryFn: processArticles,
-    enabled: false,
+  const mutation = useMutation({
+    mutationFn: processArticles,
+    onSuccess: (message: string) => {
+      setSuccessMessage(message);
+      queryClient.invalidateQueries({ queryKey: ["unprocessed-articles"] });
+    },
+    onError: () => {
+      setErrorMessage("Failed to import articles.");
+    },
   });
 
-  const handleProcessArticlesSubmit = (
-    event: MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    queryProcessArticles.refetch();
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    mutation.mutate();
   };
 
   const handleProcessedArticlesCountRefresh = (
@@ -50,18 +57,14 @@ export function NaturalLanguageProcessing() {
     setErrorMessage("");
   };
 
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["unprocessed-articles"] });
-  }, [queryProcessArticles.data, queryClient]);
-
-  useEffect(() => {
-    if (queryProcessArticles.error) {
-      setErrorMessage("Something went wrong.");
-    }
-  }, [queryProcessArticles.error]);
-
   if (queryUnprocessedArticles.isLoading) {
-    return <>Loading ...</>;
+    return (
+      <LoadingOverlay
+        visible={queryUnprocessedArticles.isLoading}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+      />
+    );
   }
 
   if (queryUnprocessedArticles.error) {
@@ -81,6 +84,7 @@ export function NaturalLanguageProcessing() {
             title="Done!"
             mt="md"
             withBorder
+            style={{ boxShadow: "none" }}
             onClose={handleNotificationClose}
           >
             {successMessage}
@@ -110,37 +114,38 @@ export function NaturalLanguageProcessing() {
                 />
               </ActionIcon>
             </Text>
-            {errorMessage && (
-              <Notification
-                icon={
-                  <IconX
-                    style={{
-                      width: rem(20),
-                      height: rem(20),
-                    }}
-                  />
-                }
-                withBorder
-                color="red"
-                title="Error!"
-                mt="lg"
-                style={{ boxShadow: "none" }}
-                onClose={handleNotificationClose}
-              >
-                {errorMessage}
-              </Notification>
-            )}
-            <Group mt="lg">
-              <Button
-                disabled={queryUnprocessedArticles.data === 0}
-                loading={queryProcessArticles.isLoading}
-                type="button"
-                color="teal"
-                onClick={handleProcessArticlesSubmit}
-              >
-                Process with NLP API
-              </Button>
-            </Group>
+            <form onSubmit={handleFormSubmit}>
+              {errorMessage && (
+                <Notification
+                  icon={
+                    <IconX
+                      style={{
+                        width: rem(20),
+                        height: rem(20),
+                      }}
+                    />
+                  }
+                  withBorder
+                  color="red"
+                  title="Error!"
+                  mt="lg"
+                  style={{ boxShadow: "none" }}
+                  onClose={handleNotificationClose}
+                >
+                  {errorMessage}
+                </Notification>
+              )}
+              <Group mt="lg">
+                <Button
+                  disabled={queryUnprocessedArticles.data === 0}
+                  loading={mutation.isPending}
+                  type="submit"
+                  color="teal"
+                >
+                  Process with NLP API
+                </Button>
+              </Group>
+            </form>
           </>
         )}
       </Paper>

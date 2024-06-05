@@ -14,7 +14,7 @@ export async function getUnprocessedArticles() {
 
 export async function processArticles() {
   try {
-    const response = await apiClient.get("/process_articles/");
+    const response = await apiClient.post("/process_articles/", {});
     return response.data;
   } catch (error) {
     console.log(error);
