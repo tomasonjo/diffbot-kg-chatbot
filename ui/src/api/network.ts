@@ -6,5 +6,6 @@ export async function getNetwork() {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }

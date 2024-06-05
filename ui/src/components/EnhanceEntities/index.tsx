@@ -23,9 +23,10 @@ const schema = z.object({
 
 export function EnhanceEntities() {
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const unprocessedEntitiesQuery = useQuery({
-    queryKey: ["unprocessed_entities"],
+    queryKey: ["unprocessed-entities"],
     queryFn: getUnprocessedEntities,
   });
 
@@ -42,6 +43,11 @@ export function EnhanceEntities() {
       setSuccessMessage(message);
       unprocessedEntitiesQuery.refetch();
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      console.log(JSON.stringify(error));
+      setErrorMessage("Failed to process entities.");
+    },
   });
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -56,6 +62,7 @@ export function EnhanceEntities() {
 
   const handleNotificationClose = () => {
     setSuccessMessage("");
+    setErrorMessage("");
   };
 
   return (
@@ -74,6 +81,17 @@ export function EnhanceEntities() {
             onClose={handleNotificationClose}
           >
             {successMessage}
+          </Notification>
+        ) : errorMessage ? (
+          <Notification
+            icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}
+            color="red"
+            title="Processing completed."
+            mt="md"
+            withBorder
+            onClose={handleNotificationClose}
+          >
+            {errorMessage}
           </Notification>
         ) : (
           <>

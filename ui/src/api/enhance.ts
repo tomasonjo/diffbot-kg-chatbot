@@ -12,6 +12,7 @@ export async function getUnprocessedEntities() {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 
@@ -21,5 +22,6 @@ export async function enhanceEntities(payload: EnhanceKnowledgeGraphPayload) {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }

@@ -6,5 +6,6 @@ export async function getDashboard() {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }

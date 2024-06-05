@@ -8,6 +8,7 @@ export async function getUnprocessedArticles() {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 
@@ -17,5 +18,6 @@ export async function processArticles() {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
