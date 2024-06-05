@@ -47,7 +47,7 @@ export function Chat() {
       ]);
 
       const remoteChain = new RemoteRunnable({
-        url: `${import.meta.env.VITE_API_BASE_URL}/${mode.endpoint}`,
+        url: `/api/${mode.endpoint}`,
       });
 
       const stream = await remoteChain.streamLog({
@@ -85,6 +85,8 @@ export function Chat() {
           return newMessages;
         });
       }
+
+      console.log("currentOutput", currentOutput);
     } catch (error) {
       console.error("Error invoking remote chain:", error);
       setError(`Error invoking remote chain: ${JSON.stringify(error)}`);
