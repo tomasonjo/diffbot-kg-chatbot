@@ -44,10 +44,8 @@ services:
   ui:
     build:
       context: ./ui
-      args:
-        - BASE_API_URL=${BASE_API_URL-http://api:8000}
     environment:
-      - VITE_API_BASE_URL=${BASE_API_URL-http://api:8000}
+      - VITE_API_BASE_URL=${BASE_API_URL-http://localhost:8000}
     networks:
       - net
     depends_on:

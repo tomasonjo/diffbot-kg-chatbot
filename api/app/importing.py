@@ -24,7 +24,9 @@ def get_articles(
             search_query += f'+text%3A"{query}"'
         if tag:
             search_query += f'+tags.label%3A"{tag}"'
-        url = f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
+        url = (
+            f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
+        )
         return requests.get(url).json()
     except Exception as ex:
         raise ex
