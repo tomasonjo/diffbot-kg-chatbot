@@ -128,7 +128,7 @@ def enhance_entities(entity_data: EntityData) -> bool:
     entities = graph.query(
         "MATCH (a:Person|Organization) WHERE a.processed IS NULL "
         "WITH a LIMIT toInteger($limit) "
-        "RETURN [el in labels(a) WHERE el <> '_Entity_' | el][0] "
+        "RETURN [el in labels(a) WHERE el <> '__Entity__' | el][0] "
         "AS label, collect(a.name) AS entities",
         params={"limit": entity_data.size},
     )
