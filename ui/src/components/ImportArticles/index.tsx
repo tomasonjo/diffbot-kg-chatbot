@@ -36,6 +36,7 @@ const schema = z.object({
 
 export function ImportArticles() {
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm({
     validate: zodResolver(schema),
@@ -51,11 +52,16 @@ export function ImportArticles() {
     onSuccess: (import_count: number) => {
       setSuccessMessage(`Successfully imported ${import_count} articles!`);
     },
+    onError: () => {
+      setErrorMessage("Failed to import articles.");
+    },
   });
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    setSuccessMessage("");
+    setErrorMessage("");
     form.validate();
 
     if (form.isValid()) {
@@ -65,6 +71,7 @@ export function ImportArticles() {
 
   const handleNotificationClose = () => {
     setSuccessMessage("");
+    setErrorMessage("");
   };
 
   return (
@@ -114,7 +121,7 @@ export function ImportArticles() {
                 key={form.key("size")}
                 {...form.getInputProps("size")}
               />
-              {mutation.error && (
+              {errorMessage && (
                 <Notification
                   icon={
                     <IconX
@@ -128,8 +135,10 @@ export function ImportArticles() {
                   color="red"
                   title="Error!"
                   mt="lg"
+                  style={{ boxShadow: "none" }}
+                  onClose={handleNotificationClose}
                 >
-                  {JSON.stringify(mutation.error)}
+                  {errorMessage}
                 </Notification>
               )}
               <Group mt="lg">

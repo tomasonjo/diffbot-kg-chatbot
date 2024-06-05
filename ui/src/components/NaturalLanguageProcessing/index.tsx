@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 export function NaturalLanguageProcessing() {
   const queryClient = useQueryClient();
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const queryUnprocessedArticles = useQuery({
     queryKey: ["unprocessed-articles"],
@@ -46,11 +47,18 @@ export function NaturalLanguageProcessing() {
 
   const handleNotificationClose = () => {
     setSuccessMessage("");
+    setErrorMessage("");
   };
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["unprocessed-articles"] });
   }, [queryProcessArticles.data, queryClient]);
+
+  useEffect(() => {
+    if (queryProcessArticles.error) {
+      setErrorMessage("Something went wrong.");
+    }
+  }, [queryProcessArticles.error]);
 
   if (queryUnprocessedArticles.isLoading) {
     return <>Loading ...</>;
@@ -102,7 +110,7 @@ export function NaturalLanguageProcessing() {
                 />
               </ActionIcon>
             </Text>
-            {queryProcessArticles.error && (
+            {errorMessage && (
               <Notification
                 icon={
                   <IconX
@@ -116,8 +124,10 @@ export function NaturalLanguageProcessing() {
                 color="red"
                 title="Error!"
                 mt="lg"
+                style={{ boxShadow: "none" }}
+                onClose={handleNotificationClose}
               >
-                {JSON.stringify(queryProcessArticles.error)}
+                {errorMessage}
               </Notification>
             )}
             <Group mt="lg">

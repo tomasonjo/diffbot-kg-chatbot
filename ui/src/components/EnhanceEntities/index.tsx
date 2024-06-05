@@ -53,6 +53,9 @@ export function EnhanceEntities() {
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    setSuccessMessage("");
+    setErrorMessage("");
+
     form.validate();
 
     if (form.isValid()) {
