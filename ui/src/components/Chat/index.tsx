@@ -66,8 +66,6 @@ export function Chat() {
           currentOutput = currentOutput.concat(chunk);
         }
 
-        console.log("currentOutput", currentOutput.state);
-
         setMessages((prevMessages) => {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];

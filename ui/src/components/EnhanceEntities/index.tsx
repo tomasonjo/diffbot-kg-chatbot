@@ -33,7 +33,7 @@ export function EnhanceEntities() {
   const form = useForm({
     validate: zodResolver(schema),
     initialValues: {
-      size: 10,
+      size: 50,
     },
   });
 
@@ -79,19 +79,9 @@ export function EnhanceEntities() {
             mt="md"
             withBorder
             onClose={handleNotificationClose}
+            style={{ boxShadow: "none" }}
           >
             {successMessage}
-          </Notification>
-        ) : errorMessage ? (
-          <Notification
-            icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}
-            color="red"
-            title="Processing completed."
-            mt="md"
-            withBorder
-            onClose={handleNotificationClose}
-          >
-            {errorMessage}
           </Notification>
         ) : (
           <>
@@ -118,19 +108,20 @@ export function EnhanceEntities() {
                 label="Number of entities to enhance"
                 mt="sm"
                 min={1}
-                max={99}
                 key={form.key("size")}
                 {...form.getInputProps("size")}
               />
-              {mutation.error && (
+              {errorMessage && (
                 <Notification
                   icon={<IconX style={{ width: rem(20), height: rem(20) }} />}
                   withBorder
                   color="red"
                   title="Error!"
                   mt="lg"
+                  style={{ boxShadow: "none" }}
+                  onClose={handleNotificationClose}
                 >
-                  {JSON.stringify(mutation.error)}
+                  {errorMessage}
                 </Notification>
               )}
               <Group mt="lg">

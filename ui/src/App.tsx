@@ -13,31 +13,7 @@ import { MantineProvider, createTheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Neo4jNetworkGraph } from "./components/NetworkGraph";
 
-const theme = createTheme({
-  components: {
-    Input: {
-      styles: () => ({
-        input: {
-          borderWidth: "2px",
-        },
-      }),
-    },
-    TextInput: {
-      styles: () => ({
-        input: {
-          borderWidth: "2px",
-        },
-      }),
-    },
-    Select: {
-      styles: () => ({
-        input: {
-          borderWidth: "2px",
-        },
-      }),
-    },
-  },
-});
+const theme = createTheme({});
 
 const router = createBrowserRouter([
   {

@@ -68,7 +68,6 @@ export const NetworkGraph = () => {
         }
       }
 
-      console.log("Graph is ", graph.toJSON());
       loadGraph(graph as Graph<NodeType, EdgeType, Attributes>);
       assignCircular();
 
@@ -86,7 +85,7 @@ export const NetworkGraph = () => {
       nodeReducer: (node, data) => {
         const graph = sigma.getGraph();
         const newData = { ...data, highlighted: data.highlighted || false };
-        console.log(newData);
+
         if (hoveredNode) {
           if (
             node === hoveredNode ||
