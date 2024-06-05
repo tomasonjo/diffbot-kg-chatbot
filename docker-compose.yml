@@ -44,19 +44,19 @@ services:
   ui:
     build:
       context: ./ui
+      target: development
     environment:
-      - VITE_API_BASE_URL=${BASE_API_URL-http://localhost:8000}
+      - VITE_API_BASE_URL=${BASE_API_URL-http://api:8000}
     networks:
       - net
     depends_on:
       neo4j:
         condition: service_healthy
-    develop:
-      watch:
-        - action: rebuild
-          path: ./ui
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
     ports:
-      - 8502:8502
+      - 3000:3000
   ui-legacy:
     build:
       context: ./ui_legacy
