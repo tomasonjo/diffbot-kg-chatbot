@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Button,
   Notification,
   Paper,
   Skeleton,
@@ -14,6 +15,9 @@ import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
 import { ChatMessage } from "./interfaces";
 import { getChatHistory } from "./utils";
+import { RetrievalModeSelector } from "./components/RetrievalModeSelector";
+import { useQuery } from "@tanstack/react-query";
+import { refreshSchema } from "../../api";
 
 export function Chat() {
   const { retrievalMode } = globalStore();
@@ -21,6 +25,12 @@ export function Chat() {
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const refreshSchemaQuery = useQuery({
+    queryKey: ["refresh-schema"],
+    queryFn: refreshSchema,
+    enabled: false,
+  });
 
   const handleSubmit = async () => {
     if (input.trim() === "") return;
@@ -171,6 +181,23 @@ export function Chat() {
               <IconSend2 style={{ width: "70%", height: "70%" }} stroke={1.5} />
             </ActionIcon>
           </div>
+        </div>
+        <div className={styles.inputOptions}>
+          <div className={styles.mode}>
+            <RetrievalModeSelector />
+          </div>
+
+          {retrievalMode === "text2cypher" && (
+            <Button
+              size="xs"
+              loading={refreshSchemaQuery.isFetching}
+              variant="subtle"
+              color="teal"
+              onClick={() => refreshSchemaQuery.refetch()}
+            >
+              Refresh schema
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -43,6 +43,23 @@
   right: rem(8px);
 }
 
+.inputOptions {
+  display: flex;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: var(--mantine-spacing-xs);
+  padding-top: var(--mantine-spacing-xs);
+
+  & .mode {
+    white-space: nowrap;
+    font-size: 11px;
+    width: 100%;
+    max-width: rem(300px);
+    margin-right: var(--mantine-spacing-xs);
+  }
+}
+
 .message {
   position: relative;
   display: flex;

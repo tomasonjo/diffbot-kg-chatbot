@@ -1,6 +1,6 @@
-import { useMantineColorScheme, Title } from "@mantine/core";
+import { useMantineColorScheme } from "@mantine/core";
 import { IconAffiliate, IconBrightness } from "@tabler/icons-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   IconBulb,
   IconDashboard,
@@ -11,7 +11,6 @@ import {
 } from "@tabler/icons-react";
 
 import styles from "./styles.module.css";
-import { RetrievalModeSelector } from "../Chat/components/RetrievalModeSelector";
 
 const MAIN_MENU_LINKS = [
   { link: "/", label: "Introduction", icon: IconBulb },
@@ -29,7 +28,6 @@ const MAIN_MENU_LINKS = [
 
 export function Sidebar() {
   const { setColorScheme, colorScheme } = useMantineColorScheme();
-  const location = useLocation();
 
   const handleThemeChange = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
@@ -48,17 +46,7 @@ export function Sidebar() {
 
   return (
     <nav className={styles.navbar}>
-      <div className={styles.links}>
-        {links}
-        {location.pathname.includes("/chat-agent/") && (
-          <>
-            <Title order={5} pl="xs" mt="lg">
-              RAG Mode
-            </Title>
-            <RetrievalModeSelector />
-          </>
-        )}
-      </div>
+      <div className={styles.links}>{links}</div>
       <div className={styles.toolbox}>
         <span onClick={handleThemeChange}>
           <IconBrightness />

@@ -1,22 +1,20 @@
-import { Radio, Stack } from "@mantine/core";
+import { Radio, Select, Stack } from "@mantine/core";
 import { RETRIEVAL_MODES } from "../../../../global/constants";
 import { globalStore } from "../../../../global/state";
 
 export function RetrievalModeSelector() {
   const { retrievalMode, setRetrievalMode } = globalStore();
+  const data = RETRIEVAL_MODES.map((mode) => ({
+    value: mode.name,
+    label: mode.label + " RAG Mode",
+  }));
 
   return (
-    <Stack p="xs">
-      {RETRIEVAL_MODES.map(({ name, label }) => {
-        return (
-          <Radio
-            key={name}
-            checked={name === retrievalMode}
-            onChange={() => setRetrievalMode(name)}
-            label={label}
-          />
-        );
-      })}
-    </Stack>
+    <Select
+      value={retrievalMode}
+      data={data}
+      size="xs"
+      onChange={(value) => setRetrievalMode(value as string)}
+    />
   );
 }
