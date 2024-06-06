@@ -7,10 +7,11 @@ import {
 } from "@react-sigma/core";
 import { useLayoutCircular } from "@react-sigma/layout-circular";
 import { useQuery } from "@tanstack/react-query";
-import { getNetwork } from "../../api/network";
 import Graph from "graphology";
 import { Attributes } from "graphology-types";
 import { String2HexCodeColor } from "string-to-hex-code-color";
+import { getNodeIcon, getNodeSize } from "./utils";
+import { getNetwork } from "../../api/network";
 
 export type NodeType = {
   x: number;
@@ -39,16 +40,18 @@ export const NetworkGraph = () => {
     // Create & load the graph on
     if (query.data) {
       const graph = new Graph();
-      const string2HexCodeColor = new String2HexCodeColor();
 
+      console.log(query.data.nodes);
       for (const node of query.data.nodes) {
         try {
+          console.log({ ...getNodeIcon(node.labels) });
           graph.addNode(node.id, {
             label: node.id,
-            size: 10,
-            color: string2HexCodeColor.stringToColor(node.labels),
+            size: getNodeSize(node.labels),
+
             x: Math.random(),
             y: Math.random(),
+            ...getNodeIcon(node.labels),
           });
         } catch (err) {
           console.log(err);
@@ -109,7 +112,7 @@ export const NetworkGraph = () => {
         return newData;
       },
       renderEdgeLabels: true,
-      labelDensity: 0.1, // increase for better legibility
+      labelDensity: 10, // increase for better legibility
       labelGridCellSize: 30,
     });
   }, [hoveredNode, setSettings, sigma]);
