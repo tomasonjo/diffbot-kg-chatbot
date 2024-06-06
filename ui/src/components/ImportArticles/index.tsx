@@ -19,20 +19,31 @@ import { FormEvent, useState } from "react";
 import { IconCheck, IconX } from "@tabler/icons-react";
 
 const INDUSTRY_OPTIONS = [
-  "LLM",
-  "Artificial intelligence",
-  "Natural language processing",
-  "Business",
-  "Business & finance",
-  "Technology & computing",
-  "Semantic web",
+  { value: "", label: "None" },
+  { value: "LLM", label: "LLM" },
+  { value: "Artificial intelligence", label: "Artificial intelligence" },
+  {
+    value: "Natural language processing",
+    label: "Natural language processing",
+  },
+  { value: "Business", label: "Business" },
+  { value: "Business & finance", label: "Business & finance" },
+  { value: "Technology & computing", label: "Technology & computing" },
+  { value: "Semantic web", label: "Semantic web" },
 ];
 
-const schema = z.object({
-  query: z.string().min(2, { message: "Please enter a query." }),
-  tag: z.string(),
-  size: z.number().min(1, { message: "You must import at least one article." }),
-});
+const schema = z
+  .object({
+    query: z.string().optional(),
+    tag: z.string().optional(),
+    size: z
+      .number()
+      .min(1, { message: "You must import at least one article." }),
+  })
+  .refine((data) => data.query || data.tag, {
+    message: "Either 'query' or 'tag' or both must be provided.",
+    path: ["query", "tag"],
+  });
 
 export function ImportArticles() {
   const [successMessage, setSuccessMessage] = useState("");
@@ -49,7 +60,7 @@ export function ImportArticles() {
 
   const mutation = useMutation({
     mutationFn: importArticles,
-    onSuccess: (import_count: number) => {
+    onSuccess: (import_count) => {
       setSuccessMessage(`Successfully imported ${import_count} articles!`);
     },
     onError: () => {
@@ -59,11 +70,13 @@ export function ImportArticles() {
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setSuccessMessage("");
     setErrorMessage("");
-    form.validate();
+    const validationResult = form.validate();
 
+    if (validationResult.hasErrors) {
+      return;
+    }
     if (form.isValid()) {
       mutation.mutate(form.values);
     }
@@ -99,17 +112,14 @@ export function ImportArticles() {
             </Text>
             <form onSubmit={handleFormSubmit}>
               <TextInput
-                withAsterisk
                 label="Keyword or company"
-                placeholder="Neo4j inc"
-                key={form.key("query")}
+                placeholder="Example: Neo4j Inc"
                 {...form.getInputProps("query")}
               />
               <Select
                 label="Industry"
                 placeholder="Pick value"
                 data={INDUSTRY_OPTIONS}
-                key={form.key("tag")}
                 {...form.getInputProps("tag")}
                 mt="sm"
               />
@@ -119,19 +129,11 @@ export function ImportArticles() {
                 mt="sm"
                 min={1}
                 max={99}
-                key={form.key("size")}
                 {...form.getInputProps("size")}
               />
               {errorMessage && (
                 <Notification
-                  icon={
-                    <IconX
-                      style={{
-                        width: rem(20),
-                        height: rem(20),
-                      }}
-                    />
-                  }
+                  icon={<IconX style={{ width: rem(20), height: rem(20) }} />}
                   withBorder
                   color="red"
                   title="Error!"
@@ -140,6 +142,19 @@ export function ImportArticles() {
                   onClose={handleNotificationClose}
                 >
                   {errorMessage}
+                </Notification>
+              )}
+              {form.errors["query.tag"] && (
+                <Notification
+                  icon={<IconX style={{ width: rem(20), height: rem(20) }} />}
+                  withBorder
+                  color="red"
+                  title="Error!"
+                  mt="lg"
+                  style={{ boxShadow: "none" }}
+                  withCloseButton={false}
+                >
+                  {form.errors["query.tag"]}
                 </Notification>
               )}
               <Group mt="lg">
