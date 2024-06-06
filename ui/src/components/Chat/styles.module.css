@@ -28,7 +28,10 @@
 
 .input {
   flex: 0;
-  padding: var(--mantine-spacing-xs);
+  padding: var(--mantine-spacing-lg);
+  background-color: var(--mantine-color-body);
+  border-top: rem(1px) solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
 
 .inputTextarea {
@@ -48,7 +51,6 @@
   align-items: center;
   max-width: 900px;
   margin: 0 auto;
-  padding-bottom: var(--mantine-spacing-xs);
   padding-top: var(--mantine-spacing-xs);
 
   & .mode {
@@ -65,6 +67,14 @@
   display: flex;
 }
 
+.message :first-child {
+  margin-top: 0;
+}
+
+.message :last-child {
+  margin-bottom: 0;
+}
+
 .messageAvatar {
   display: flex;
   flex: 0;
@@ -75,4 +85,19 @@
 .messageText {
   flex: 1;
   padding-top: 3px;
+
+  & pre {
+    padding: var(--mantine-spacing-xs);
+    font-family: monospace;
+    border-radius: rem(3px);
+    background-color: light-dark(
+      var(--mantine-color-gray-3),
+      var(--mantine-color-dark-4)
+    );
+  }
+}
+
+.messageMeta {
+  font-size: 10px;
+  opacity: 0.5;
 }

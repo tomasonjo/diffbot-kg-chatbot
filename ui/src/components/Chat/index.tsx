@@ -8,9 +8,8 @@ import {
 } from "@mantine/core";
 import { IconMoodSmile, IconRobotFace, IconSend2 } from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
-
-import styles from "./styles.module.css";
 import { ChangeEvent, useState } from "react";
+import Markdown from "react-markdown";
 import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
 import { ChatMessage } from "./interfaces";
@@ -19,9 +18,11 @@ import { RetrievalModeSelector } from "./components/RetrievalModeSelector";
 import { useQuery } from "@tanstack/react-query";
 import { refreshSchema } from "../../api";
 
+import styles from "./styles.module.css";
+
 export function Chat() {
   const { retrievalMode } = globalStore();
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState("How many nodes are in the database?");
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -37,7 +38,7 @@ export function Chat() {
 
     setMessages((prevMessages) => [
       ...prevMessages,
-      { sender: "user", text: input },
+      { sender: "user", text: input, mode: retrievalMode },
     ]);
 
     setInput("");
@@ -68,12 +69,29 @@ export function Chat() {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
+      let raw = "";
 
       for await (const chunk of stream) {
         if (!currentOutput) {
           currentOutput = chunk;
         } else {
           currentOutput = currentOutput.concat(chunk);
+        }
+
+        if (
+          currentOutput &&
+          currentOutput.state &&
+          currentOutput.state.logs["RunnableParallel<query>"] &&
+          currentOutput.state.logs["RunnableParallel<query>"].final_output &&
+          currentOutput.state.logs["RunnableParallel<query>"].final_output.query
+        ) {
+          console.log(
+            currentOutput.state.logs["RunnableParallel<query>"].final_output
+              .query.content,
+          );
+          raw =
+            currentOutput.state.logs["RunnableParallel<query>"].final_output
+              .query.content + "\n";
         }
 
         setMessages((prevMessages) => {
@@ -89,7 +107,7 @@ export function Chat() {
 
           newMessages[newMessages.length - 1] = {
             ...lastMessage,
-            text: newMessage,
+            text: raw + newMessage,
           };
 
           return newMessages;
@@ -120,42 +138,49 @@ export function Chat() {
   return (
     <div className={styles.chat}>
       <div className={styles.output}>
-        <div className={styles.outputText}>
-          {messages.map((message, index) => (
-            <Paper key={index} mb="xs" p="xs">
-              <div className={styles.message}>
-                <div className={styles.messageAvatar}>
-                  {message.sender === "user" ? (
-                    <IconMoodSmile />
-                  ) : (
-                    <IconRobotFace />
-                  )}
-                </div>
-                <div className={styles.messageText}>
-                  {message.text}
-                  {isGenerating &&
-                    message.sender === "bot" &&
-                    index === messages.length - 1 && (
-                      <Skeleton
-                        height={16}
-                        circle
-                        className={styles.generatingIndicator}
-                      />
+        <div className={styles.outputInner}>
+          <div className={styles.outputText}>
+            {messages.map((message, index) => (
+              <Paper key={index} mb="xs" p="xs">
+                <div className={styles.message}>
+                  <div className={styles.messageAvatar}>
+                    {message.sender === "user" ? (
+                      <IconMoodSmile />
+                    ) : (
+                      <IconRobotFace />
                     )}
+                  </div>
+                  <div className={styles.messageText}>
+                    <Markdown>{message.text}</Markdown>
+                    {isGenerating &&
+                      message.sender === "bot" &&
+                      index === messages.length - 1 && (
+                        <Skeleton
+                          height={16}
+                          circle
+                          className={styles.generatingIndicator}
+                        />
+                      )}
+                    {message.mode && (
+                      <div className={styles.messageMeta}>
+                        RAG Mode: {message.mode}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Paper>
-          ))}
-          {error && (
-            <Notification
-              color="red"
-              title="Error!"
-              withCloseButton={false}
-              style={{ boxShadow: "none" }}
-            >
-              {JSON.stringify(error)}
-            </Notification>
-          )}
+              </Paper>
+            ))}
+            {error && (
+              <Notification
+                color="red"
+                title="Error!"
+                withCloseButton={false}
+                style={{ boxShadow: "none" }}
+              >
+                {JSON.stringify(error)}
+              </Notification>
+            )}
+          </div>
         </div>
       </div>
       <div className={styles.input}>
