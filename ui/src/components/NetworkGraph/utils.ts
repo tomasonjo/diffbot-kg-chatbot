@@ -6,7 +6,7 @@ import icoOrganization from "../../assets/ico_organization.png";
 export function getNodeSize(type: string): number {
   switch (type) {
     case "Article":
-      return 20;
+      return 30;
     case "Person":
       return 20;
     case "Organization":
