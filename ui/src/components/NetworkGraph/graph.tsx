@@ -9,7 +9,6 @@ import { useLayoutCircular } from "@react-sigma/layout-circular";
 import { useQuery } from "@tanstack/react-query";
 import Graph from "graphology";
 import { Attributes } from "graphology-types";
-import { String2HexCodeColor } from "string-to-hex-code-color";
 import { getNodeIcon, getNodeSize } from "./utils";
 import { getNetwork } from "../../api/network";
 

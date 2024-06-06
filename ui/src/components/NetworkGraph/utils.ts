@@ -25,15 +25,17 @@ export function getNodeIcon(
     case "Article":
       return {
         image: icoArticle,
-        color: "pink",
+        color: "#009F6B",
       };
     case "Person":
       return {
         image: icoPerson,
+        color: "#120A8F",
       };
     case "Organization":
       return {
         image: icoOrganization,
+        color: "#DC143C",
       };
     default:
       return {
