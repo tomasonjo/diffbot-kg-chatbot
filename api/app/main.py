@@ -13,7 +13,7 @@ from importing import get_articles, import_cypher_query, process_params
 from langserve import add_routes
 from processing import process_document, store_graph_documents
 from text2cypher import text2cypher_chain
-from utils import graph
+from utils import graph, remove_null_properties
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -158,22 +158,25 @@ def fetch_network() -> Dict:
 MATCH (a:Article)-[r]->(end)
 WITH a,r,end LIMIT 100
 WITH apoc.coll.toSet(collect(distinct a) + collect(distinct end)) AS nodes,
-     collect(distinct r) AS rels
+     collect(r) AS rels
 RETURN {
     nodes: [n in nodes |
                 {
                     id: coalesce(n.title, n.name, n.id),
-                    labels: [el in labels(n) WHERE el <> "__Entity__"| el][0]
+                    labels: [el in labels(n) WHERE el <> "__Entity__"| el][0],
+                    properties: n {.*, title: Null, name: Null, id: Null, date: toString(n.date), 
+                                        founding_date: toString(n.founding_date), embedding: Null}
                 }],
     relationships: [r in rels |
                     {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id),
                      end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id),
-                     type:type(r)
+                     type:type(r),
+                     properties: r {.*}
                     }]
 } AS output
 """
     )
-    return data[0]["output"]
+    return remove_null_properties(data[0]["output"])
 
 
 add_routes(app, chain, path="/chat", enabled_endpoints=["stream_log"])
