@@ -31,7 +31,7 @@ export function Chat() {
 
   const outputTextRef = useRef<HTMLDivElement | null>(null);
 
-  const [input, setInput] = useState("How many nodes are in the database?");
+  const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
