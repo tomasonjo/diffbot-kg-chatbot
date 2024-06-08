@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
@@ -117,3 +117,29 @@ def generate_full_text_query(input: str) -> str:
         full_text_query += f" {word}~2 AND"
     full_text_query += f" {words[-1]}~2"
     return full_text_query.strip()
+
+
+def remove_null_properties(data: Dict[str, Any]):
+    if not data:
+        return []
+    # Process the 'nodes' part of the data
+    for node in data["nodes"]:
+        # Create a list of keys to remove (those that are None)
+        keys_to_remove = [
+            key for key, value in node["properties"].items() if value is None
+        ]
+        # Remove each key from the properties dictionary
+        for key in keys_to_remove:
+            node["properties"].pop(key)
+
+    # Process the 'relationships' part of the data
+    for relationship in data["relationships"]:
+        # Create a list of keys to remove (those that are None)
+        keys_to_remove = [
+            key for key, value in relationship["properties"].items() if value is None
+        ]
+        # Remove each key from the properties dictionary
+        for key in keys_to_remove:
+            relationship["properties"].pop(key)
+
+    return data
