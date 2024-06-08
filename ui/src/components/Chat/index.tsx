@@ -1,14 +1,20 @@
 import {
   ActionIcon,
   Button,
+  Loader,
   Notification,
   Paper,
   Skeleton,
   Textarea,
 } from "@mantine/core";
-import { IconMoodSmile, IconRobotFace, IconSend2 } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconMoodSmile,
+  IconRobotFace,
+  IconSend2,
+} from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
@@ -22,6 +28,9 @@ import styles from "./styles.module.css";
 
 export function Chat() {
   const { retrievalMode } = globalStore();
+
+  const outputTextRef = useRef<HTMLDivElement | null>(null);
+
   const [input, setInput] = useState("How many nodes are in the database?");
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -135,13 +144,60 @@ export function Chat() {
     }
   };
 
+  const scrollToBottom = () => {
+    if (outputTextRef.current) {
+      outputTextRef.current.scrollTop = outputTextRef.current.scrollHeight;
+    }
+  };
+
+  const isAtBottom = () => {
+    console.log(
+      "IS AT BOTTOM?",
+      outputTextRef.current &&
+        outputTextRef.current.scrollHeight - outputTextRef.current.scrollTop ===
+          outputTextRef.current.clientHeight,
+    );
+    return (
+      outputTextRef.current &&
+      outputTextRef.current.scrollHeight - outputTextRef.current.scrollTop ===
+        outputTextRef.current.clientHeight
+    );
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+
+    const observer = new MutationObserver(() => {
+      if (!isAtBottom()) {
+        scrollToBottom();
+      }
+    });
+
+    if (outputTextRef.current) {
+      observer.observe(outputTextRef.current, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className={styles.chat}>
       <div className={styles.output}>
-        <div className={styles.outputInner}>
-          <div className={styles.outputText}>
+        <div className={styles.outputText} ref={outputTextRef}>
+          <div>
             {messages.map((message, index) => (
-              <Paper key={index} mb="xs" p="xs">
+              <Paper
+                key={index}
+                mb="xs"
+                p="xs"
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
                 <div className={styles.message}>
                   <div className={styles.messageAvatar}>
                     {message.sender === "user" ? (
@@ -151,16 +207,13 @@ export function Chat() {
                     )}
                   </div>
                   <div className={styles.messageText}>
+                    {message.sender === "bot" && message.text.length === 0 && (
+                      <IconChevronRight
+                        size={18}
+                        style={{ marginBottom: "-3px" }}
+                      />
+                    )}
                     <Markdown>{message.text}</Markdown>
-                    {isGenerating &&
-                      message.sender === "bot" &&
-                      index === messages.length - 1 && (
-                        <Skeleton
-                          height={16}
-                          circle
-                          className={styles.generatingIndicator}
-                        />
-                      )}
                     {message.mode && (
                       <div className={styles.messageMeta}>
                         RAG Mode: {message.mode}
@@ -168,6 +221,11 @@ export function Chat() {
                     )}
                   </div>
                 </div>
+                {isGenerating &&
+                  message.sender === "bot" &&
+                  index === messages.length - 1 && (
+                    <div className={styles.isGenerating}></div>
+                  )}
               </Paper>
             ))}
             {error && (

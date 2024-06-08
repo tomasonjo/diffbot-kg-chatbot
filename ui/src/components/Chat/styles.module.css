@@ -5,18 +5,32 @@
 }
 
 .output {
-  overflow-y: auto;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  justify-content: flex-end;
   padding: var(--mantine-spacing-xs);
+  position: relative;
+  min-height: 0px;
+  height: 100%;
 }
 
 .outputText {
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
+  position: relative;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  align-self: flex-end;
+  overflow-y: auto;
+  align-content: flex-end;
+
+  & > div {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+  }
 
   & .generatingIndicator {
     display: inline-block;
@@ -65,6 +79,38 @@
 .message {
   position: relative;
   display: flex;
+  z-index: 2;
+  min-height: rem(28px);
+}
+
+.isGenerating {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6)) 50%,
+    transparent 100%
+  );
+  background-size: 100% 100%;
+  height: 100%;
+}
+
+@keyframes placeHolderShimmer {
+  0% {
+    background-position: -900px 0;
+  }
+  100% {
+    background-position: 900px 0;
+  }
 }
 
 .message :first-child {
