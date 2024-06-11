@@ -43,3 +43,15 @@ export function getNodeIcon(
       };
   }
 }
+
+export function getNodeGraphType(type: string) {
+  switch (type) {
+    case "Article":
+    case "Author":
+    case "Chunk":
+    case "Site nodes":
+      return "lexical";
+    default:
+      return "entity";
+  }
+}

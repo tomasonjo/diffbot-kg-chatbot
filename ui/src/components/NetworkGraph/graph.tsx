@@ -4,13 +4,20 @@ import {
   useRegisterEvents,
   useLoadGraph,
   useSetSettings,
+  ControlsContainer,
+  ZoomControl,
+  FullScreenControl,
+  SearchControl,
 } from "@react-sigma/core";
 import { useLayoutCircular } from "@react-sigma/layout-circular";
 import { useQuery } from "@tanstack/react-query";
 import Graph from "graphology";
 import { Attributes } from "graphology-types";
-import { getNodeIcon, getNodeSize } from "./utils";
+import { getNodeGraphType, getNodeIcon, getNodeSize } from "./utils";
 import { getNetwork } from "../../api/network";
+import { Button } from "@mantine/core";
+
+import styles from "./styles.module.css";
 
 export type NodeType = {
   x: number;
@@ -29,31 +36,43 @@ export const NetworkGraph = () => {
   const loadGraph = useLoadGraph<NodeType, EdgeType>();
   const { assign: assignCircular } = useLayoutCircular();
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [visibleNodeGraphTypes, setVisibleNodeGraphTypes] = useState([
+    "entity",
+  ]);
 
   const query = useQuery({
     queryKey: ["network"],
     queryFn: getNetwork,
   });
 
+  const handleGraphFilterClick = (graphType: string) => {
+    if (visibleNodeGraphTypes.includes(graphType)) {
+      setVisibleNodeGraphTypes(
+        visibleNodeGraphTypes.filter((f) => f !== graphType),
+      );
+    } else {
+      setVisibleNodeGraphTypes([...visibleNodeGraphTypes, graphType]);
+    }
+  };
+
   useEffect(() => {
-    // Create & load the graph on
+    // Create & load the graph on mount
     if (query.data) {
       const graph = new Graph();
 
-      console.log(query.data.nodes);
       for (const node of query.data.nodes) {
         try {
-          console.log({ ...getNodeIcon(node.labels) });
           graph.addNode(node.id, {
             label: node.id,
             size: getNodeSize(node.labels),
-
             x: Math.random(),
             y: Math.random(),
+            labels: node.labels,
+            nodeGraphType: getNodeGraphType(node.labels),
             ...getNodeIcon(node.labels),
           });
         } catch (err) {
-          console.log(err);
+          //console.log(err);
         }
       }
 
@@ -84,9 +103,16 @@ export const NetworkGraph = () => {
   useEffect(() => {
     // apply custom settings
     setSettings({
-      nodeReducer: (node, data) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      nodeReducer: (node, data: any) => {
         const graph = sigma.getGraph();
         const newData = { ...data, highlighted: data.highlighted || false };
+
+        if (visibleNodeGraphTypes.includes(data.nodeGraphType)) {
+          newData.hidden = false;
+        } else {
+          newData.hidden = true;
+        }
 
         if (hoveredNode) {
           if (
@@ -99,6 +125,7 @@ export const NetworkGraph = () => {
             newData.highlighted = false;
           }
         }
+
         return newData;
       },
       edgeReducer: (edge, data) => {
@@ -108,13 +135,48 @@ export const NetworkGraph = () => {
         if (hoveredNode && !graph.extremities(edge).includes(hoveredNode)) {
           newData.hidden = true;
         }
+
         return newData;
       },
       renderEdgeLabels: true,
-      labelDensity: 10, // increase for better legibility
-      labelGridCellSize: 30,
+      labelDensity: 0.07,
+      labelGridCellSize: 60,
+      labelRenderedSizeThreshold: 15,
     });
-  }, [hoveredNode, setSettings, sigma]);
+  }, [hoveredNode, setSettings, sigma, visibleNodeGraphTypes]);
 
-  return null;
+  return (
+    <>
+      <ControlsContainer position={"top-left"}>
+        <div className={styles.filters}>
+          <Button
+            size="xs"
+            onClick={() => handleGraphFilterClick("lexical")}
+            style={{
+              opacity: visibleNodeGraphTypes.includes("lexical") ? "1" : "0.5",
+            }}
+          >
+            Lexical graph
+          </Button>
+          <Button
+            size="xs"
+            style={{
+              opacity: visibleNodeGraphTypes.includes("entity") ? "1" : "0.5",
+            }}
+            ml="xs"
+            onClick={() => handleGraphFilterClick("entity")}
+          >
+            Entity graph
+          </Button>
+        </div>
+      </ControlsContainer>
+      <ControlsContainer position={"bottom-right"}>
+        <ZoomControl />
+        <FullScreenControl />
+      </ControlsContainer>
+      <ControlsContainer position={"top-right"}>
+        <SearchControl style={{ width: "200px" }} />
+      </ControlsContainer>
+    </>
+  );
 };

@@ -42,13 +42,6 @@ export function Neo4jNetworkGraph() {
     >
       <NetworkGraph />
       <Fa2 />
-      <ControlsContainer position={"bottom-right"}>
-        <ZoomControl />
-        <FullScreenControl />
-      </ControlsContainer>
-      <ControlsContainer position={"top-right"}>
-        <SearchControl style={{ width: "200px" }} />
-      </ControlsContainer>
     </SigmaContainer>
   );
 }
