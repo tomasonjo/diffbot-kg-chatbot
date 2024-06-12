@@ -1,10 +1,8 @@
 import {
   ActionIcon,
   Button,
-  Loader,
   Notification,
   Paper,
-  Skeleton,
   Textarea,
 } from "@mantine/core";
 import {
@@ -70,11 +68,31 @@ export function Chat() {
         url: `/api/${mode.endpoint}`,
       });
 
-      const stream = await remoteChain.streamLog({
-        question: input,
-        chat_history: getChatHistory(messages, 3),
-        mode: mode.name,
-      });
+      let payload: Record<string, any>;
+      const chatHistory = getChatHistory(messages, 3);
+
+      switch (mode.name) {
+        case "graph_based_prefiltering":
+          payload = {
+            input,
+            chat_history: chatHistory,
+          };
+          break;
+        case "text2cypher":
+          payload = {
+            question: input,
+            chat_history: chatHistory,
+          };
+          break;
+        default:
+          payload = {
+            question: input,
+            chat_history: chatHistory,
+            mode: mode.name,
+          };
+      }
+
+      const stream = await remoteChain.streamLog(payload);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
