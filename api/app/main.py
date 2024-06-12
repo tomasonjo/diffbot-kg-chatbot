@@ -155,25 +155,37 @@ def fetch_network() -> Dict:
     """
     data = graph.query(
         """
-MATCH (a:Article)-[r]->(end)
-WITH a,r,end LIMIT 100
-WITH apoc.coll.toSet(collect(distinct a) + collect(distinct end)) AS nodes,
-     collect(r) AS rels
-RETURN {
-    nodes: [n in nodes |
+CALL {
+    MATCH (a:Article)-[r]->(end)
+    WITH a,r,end LIMIT 200
+    WITH apoc.coll.toSet(collect(distinct a) + collect(distinct end)) AS nodes,
+        collect(r) AS rels
+    RETURN nodes,
+           rels
+UNION ALL
+    MATCH (a:Article)-[]->(end)
+    WITH end LIMIT 200
+    MATCH (end)-[r]->(neighbor)
+    WITH collect(distinct neighbor) AS nodes,
+         collect(r) AS rels
+    RETURN nodes, rels
+}
+WITH collect(nodes) AS allNodeSets, collect(rels) AS allRelSets
+WITH apoc.coll.flatten(allNodeSets) AS allNodes, apoc.coll.flatten(allRelSets) AS allRels
+RETURN {nodes: [n in allNodes |
                 {
                     id: coalesce(n.title, n.name, n.id),
                     labels: [el in labels(n) WHERE el <> "__Entity__"| el][0],
                     properties: n {.*, title: Null, name: Null, id: Null, date: toString(n.date), 
                                         founding_date: toString(n.founding_date), embedding: Null}
-                }],
-    relationships: [r in rels |
+                }] ,
+        relationships: [r in allRels |
                     {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id),
-                     end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id),
-                     type:type(r),
-                     properties: r {.*}
+                    end: coalesce(endNode(r).title, endNode(r).name, endNode(r).id),
+                    type:type(r),
+                    properties: r {.*}
                     }]
-} AS output
+        } AS output
 """
     )
     return remove_null_properties(data[0]["output"])
