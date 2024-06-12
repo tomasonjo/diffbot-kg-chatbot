@@ -112,10 +112,6 @@ export function Chat() {
           currentOutput.state.logs["RunnableParallel<query>"].final_output &&
           currentOutput.state.logs["RunnableParallel<query>"].final_output.query
         ) {
-          console.log(
-            currentOutput.state.logs["RunnableParallel<query>"].final_output
-              .query.content,
-          );
           raw =
             currentOutput.state.logs["RunnableParallel<query>"].final_output
               .query.content + "\n";
@@ -142,9 +138,10 @@ export function Chat() {
       }
 
       console.log("currentOutput", currentOutput);
-    } catch (error) {
-      console.error("Error invoking remote chain:", error);
-      setError(`Error invoking remote chain: ${JSON.stringify(error)}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log("Error invoking remote chain:", error);
+      setError(error.message ? error.message : `${JSON.stringify(error)}`);
     }
     setIsGenerating(false);
   };
@@ -169,12 +166,6 @@ export function Chat() {
   };
 
   const isAtBottom = () => {
-    console.log(
-      "IS AT BOTTOM?",
-      outputTextRef.current &&
-        outputTextRef.current.scrollHeight - outputTextRef.current.scrollTop ===
-          outputTextRef.current.clientHeight,
-    );
     return (
       outputTextRef.current &&
       outputTextRef.current.scrollHeight - outputTextRef.current.scrollTop ===
