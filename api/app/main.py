@@ -175,8 +175,8 @@ WITH apoc.coll.flatten(allNodeSets) AS allNodes, apoc.coll.flatten(allRelSets) A
 RETURN {nodes: [n in allNodes |
                 {
                     id: coalesce(n.title, n.name, n.id),
-                    labels: [el in labels(n) WHERE el <> "__Entity__"| el][0],
-                    properties: n {.*, title: Null, name: Null, id: Null, date: toString(n.date), 
+                    tag: [el in labels(n) WHERE el <> "__Entity__"| el][0],
+                    properties: n {.*, title: Null, name: Null, id: Null, date: toString(n.date),
                                         founding_date: toString(n.founding_date), embedding: Null}
                 }] ,
         relationships: [r in allRels |

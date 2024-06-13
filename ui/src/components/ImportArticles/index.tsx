@@ -41,7 +41,7 @@ const schema = z
       .min(1, { message: "You must import at least one article." }),
   })
   .refine((data) => data.query || data.tag, {
-    message: "Either 'query' or 'tag' or both must be provided.",
+    message: "Either 'Keyword or company' or 'Industry' or both fields must be provided.",
     path: ["query", "tag"],
   });
 

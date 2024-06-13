@@ -4,8 +4,8 @@ export function IntroductionPage() {
   return (
     <Box p="lg">
       <Paper maw={640} mx="auto" shadow="xs" p="lg">
-        <Title order={2}>Neo4j and Diffbot GraphRAG demo!</Title>
-        <Text>Showcasing RAG approaches.</Text>
+        <Title order={2} mb="lg">Neo4j and Diffbot GraphRAG demo!</Title>
+        <Text size="lg">Showcasing RAG approaches.</Text>
       </Paper>
     </Box>
   );
