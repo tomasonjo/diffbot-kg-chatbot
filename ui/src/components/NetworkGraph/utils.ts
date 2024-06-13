@@ -59,8 +59,8 @@ export function getNodeIcon(
       };
     default:
       return {
-        color: "#c9c9c9", //string2HexCodeColor.stringToColor(type),
-        size: 5
+        color: "#999999", //string2HexCodeColor.stringToColor(type),
+        size: 6
       };
   }
 }
