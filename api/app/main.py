@@ -166,6 +166,8 @@ UNION ALL
     MATCH (a:Article)-[]->(end)
     WITH end LIMIT 200
     MATCH (end)-[r]->(neighbor)
+    WITH neighbor, r
+    LIMIT 350
     WITH collect(distinct neighbor) AS nodes,
          collect(r) AS rels
     RETURN nodes, rels
