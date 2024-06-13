@@ -3,3 +3,12 @@ body,
 #root {
   height: 100%;
 }
+
+a {
+  color: hsl(162, 82%, 30%);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

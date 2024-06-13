@@ -1,17 +1,17 @@
 export const RETRIEVAL_MODES = [
   {
     name: "basic_hybrid_search",
-    label: "Basic hybrid search",
+    label: "Vector only",
     endpoint: "chat",
   },
   {
     name: "basic_hybrid_search_node_neighborhood",
-    label: "Basic hybrid + node neighborhood",
+    label: "Vector + KG",
     endpoint: "chat",
   },
   {
     name: "graph_based_prefiltering",
-    label: "Graph-based prefiltering",
+    label: "Prefiltering",
     endpoint: "prefiltering",
   },
   {
