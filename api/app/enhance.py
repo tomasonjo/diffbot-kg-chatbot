@@ -334,7 +334,7 @@ def store_enhanced_data(data: List[Dict[str, Any]]) -> Dict:
     for name, element in data:
         try:
             entity = element["data"][0]["entity"]
-        except (TypeError, IndexError):
+        except Exception:
             no_data.append(name)
             continue
         type = entity["type"]
