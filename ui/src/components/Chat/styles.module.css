@@ -142,6 +142,15 @@
       var(--mantine-color-dark-4)
     );
   }
+
+  & code {
+    padding: rem(2px);
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: rem(3px);
+    background-color: light-dark(var(--mantine-color-gray-3),
+          var(--mantine-color-dark-4));
+  }
 }
 
 .messageMeta {

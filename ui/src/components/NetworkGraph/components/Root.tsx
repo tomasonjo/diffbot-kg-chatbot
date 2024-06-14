@@ -161,7 +161,7 @@ const Root: FC = () => {
       <ControlsContainer position={"top-right"}>
         <SearchControl style={{ width: "200px" }} />
       </ControlsContainer>
-      <ControlsContainer position={"bottom-right"}>
+      <ControlsContainer position={"bottom-right"} className={styles.zoomControl}>
         <ZoomControl />
         <FullScreenControl />
       </ControlsContainer>

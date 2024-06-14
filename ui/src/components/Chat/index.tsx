@@ -96,7 +96,6 @@ export function Chat() {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
-      let raw = "";
 
       for await (const chunk of stream) {
         if (!currentOutput) {
@@ -105,36 +104,7 @@ export function Chat() {
           currentOutput = currentOutput.concat(chunk);
         }
 
-        if (
-          currentOutput &&
-          currentOutput.state &&
-          currentOutput.state.logs["RunnableParallel<query>"] &&
-          currentOutput.state.logs["RunnableParallel<query>"].final_output &&
-          currentOutput.state.logs["RunnableParallel<query>"].final_output.query
-        ) {
-          raw =
-            currentOutput.state.logs["RunnableParallel<query>"].final_output
-              .query.content + "\n";
-        }
-
-        setMessages((prevMessages) => {
-          const newMessages = [...prevMessages];
-          const lastMessage = newMessages[newMessages.length - 1];
-
-          const newMessage =
-            currentOutput &&
-            currentOutput.state &&
-            currentOutput.state.final_output
-              ? currentOutput.state.final_output
-              : "";
-
-          newMessages[newMessages.length - 1] = {
-            ...lastMessage,
-            text: raw + newMessage,
-          };
-
-          return newMessages;
-        });
+        handleStreamOutput(currentOutput);
       }
 
       console.log("currentOutput", currentOutput);
@@ -144,6 +114,51 @@ export function Chat() {
       setError(error.message ? error.message : `${JSON.stringify(error)}`);
     }
     setIsGenerating(false);
+  };
+
+  const handleStreamOutput = (currentOutput: any) => {
+    let query = "";
+    let output = "";
+    let steps = "";
+
+    const state = currentOutput?.state;
+
+    // append query if it was used
+    if (state?.logs?.["RunnableParallel<query>"]?.final_output?.query) {
+      query =
+        state.logs["RunnableParallel<query>"].final_output.query.content + "\n";
+    }
+
+    setMessages((prevMessages) => {
+      const newMessages = [...prevMessages];
+      const lastMessage = newMessages[newMessages.length - 1];
+
+      if (currentOutput?.state?.final_output) {
+        if (typeof currentOutput?.state?.final_output === "object") {
+          // prefiltering final_output is an object - we include steps
+          if (state.final_output?.steps) {
+            steps = state.final_output.steps.reduce(
+              (output: string, currentStep: any) => {
+                return output + currentStep?.action?.log;
+              },
+              "",
+            );
+          }
+          // and we read output param string inside of final_output
+          output = state.final_output.output ? state.final_output.output : "";
+        } else {
+          // otherwise it's a string
+          output = state.final_output;
+        }
+      }
+
+      newMessages[newMessages.length - 1] = {
+        ...lastMessage,
+        text: query + steps + output,
+      };
+
+      return newMessages;
+    });
   };
 
   const handleTextareaInputChange = (
@@ -225,7 +240,7 @@ export function Chat() {
                     <Markdown>{message.text}</Markdown>
                     {message.mode && (
                       <div className={styles.messageMeta}>
-                        RAG Mode: {message.mode}
+                        RAG Mode: {RETRIEVAL_MODES.find(({name}) => name === message.mode)?.label}
                       </div>
                     )}
                   </div>
