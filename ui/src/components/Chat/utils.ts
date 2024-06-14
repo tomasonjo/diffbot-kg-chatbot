@@ -11,3 +11,28 @@ export function getChatHistory(messages: ChatMessage[], numLastExchanges = 3) {
   }
   return pairs;
 }
+
+export function extractContext(input: string): string {
+  console.log(input)
+  if (!input) {
+    return ""
+  }
+
+  debugger;
+
+  const contextRegex = /<context>([\s\S]*?)<\/context>/;
+  const match = input.match(contextRegex);
+
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+
+  return "";
+}
+
+export function extractKGData(context: string) {
+  // TODO: improve the parsing by wrapping  prompt for unstructured data in <tags>
+  const kgData = context.split("Unstructured data:")[0].trim().replace("Strucutred data:", "")
+  console.log(kgData)
+  debugger;
+}

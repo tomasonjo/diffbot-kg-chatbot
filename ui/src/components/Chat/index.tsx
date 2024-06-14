@@ -17,7 +17,7 @@ import Markdown from "react-markdown";
 import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
 import { ChatMessage } from "./interfaces";
-import { getChatHistory } from "./utils";
+import { extractContext, getChatHistory } from "./utils";
 import { RetrievalModeSelector } from "./components/RetrievalModeSelector";
 import { useQuery } from "@tanstack/react-query";
 import { refreshSchema } from "../../api";
@@ -152,9 +152,37 @@ export function Chat() {
         }
       }
 
+      // retrieve context
+      let context = lastMessage.context ? lastMessage.context : "";
+      if (context.length === 0) {
+        switch (retrievalMode) {
+          case "basic_hybrid_search":
+            context = extractContext(
+              state?.logs?.["ChatPromptTemplate"]?.final_output?.lc_kwargs
+                .messages[0].content,
+            );
+            break;
+          case "basic_hybrid_search_node_neighborhood":
+            context = extractContext(
+              state?.logs?.["ChatPromptTemplate:2"]?.final_output?.lc_kwargs
+                .messages[0].content,
+            );
+            break;
+          case "graph_based_prefiltering":
+            context = ""; // TODO: include context
+            break;
+          case "text2cypher":
+            context = ""; // TODO: include context
+            break;
+          default:
+            context = "";
+        }
+      }
+
       newMessages[newMessages.length - 1] = {
         ...lastMessage,
         text: query + steps + output,
+        context,
       };
 
       return newMessages;
@@ -240,7 +268,12 @@ export function Chat() {
                     <Markdown>{message.text}</Markdown>
                     {message.mode && (
                       <div className={styles.messageMeta}>
-                        RAG Mode: {RETRIEVAL_MODES.find(({name}) => name === message.mode)?.label}
+                        RAG Mode:{" "}
+                        {
+                          RETRIEVAL_MODES.find(
+                            ({ name }) => name === message.mode,
+                          )?.label
+                        }
                       </div>
                     )}
                   </div>

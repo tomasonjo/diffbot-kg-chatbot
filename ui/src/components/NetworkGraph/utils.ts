@@ -148,11 +148,11 @@ export function drawHover(
 
   let wProps: number[] = []
   let hProps = 0;
-  const allowedProps = ["mentions", "sentiment", "date", "language", "processed"];
+  const allowedProps = ["mentions", "sentiment", "date", "language", "processed", "amount", "series", "allowed_props"];
 
   Object.entries(data.properties).forEach(entry => {
     if (allowedProps.includes(entry[0])) {
-      const propText = `${entry[0]}: ${entry[1]}`;
+      const propText = `${entry[0]}: ${JSON.stringify(entry[1])}`;
       wProps.push(context.measureText(propText).width);
       hProps += hProp;
       props.push(propText);
