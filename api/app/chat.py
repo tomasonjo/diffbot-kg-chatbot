@@ -104,7 +104,7 @@ def retriever(input) -> str:
         query = query.content
     # Retrieve documents from vector index
     documents = format_docs(vector_index.similarity_search(query))
-    if input.get("mode") == "basic_hybrid_search_node_neighborhood":
+    if input.get("question", {}).get("mode") == "basic_hybrid_search_node_neighborhood":
         structured_data = structured_retriever(query)
         print(structured_data)
         documents = f"""Structured data:
