@@ -55,12 +55,17 @@ RETURN count(*)
 
 
 def store_graph_documents(graph_documents):
+    EXCLUDED_TYPES = ["Number"]
     for document in graph_documents:
         # Import nodes
         graph.query(
             node_import_query,
             {
-                "data": [el.__dict__ for el in document.nodes],
+                "data": [
+                    el.__dict__
+                    for el in document.nodes
+                    if el.type not in EXCLUDED_TYPES
+                ],
                 "document": document.source.__dict__,
             },
         )
@@ -78,6 +83,8 @@ def store_graph_documents(graph_documents):
                         "properties": el.properties,
                     }
                     for el in document.relationships
+                    if el.source.type not in EXCLUDED_TYPES
+                    and el.target.type not in EXCLUDED_TYPES
                 ]
             },
         )
