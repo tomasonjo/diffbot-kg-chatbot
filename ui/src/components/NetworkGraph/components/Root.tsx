@@ -109,9 +109,8 @@ const Root: FC = () => {
               }
               seenNodes.add(item.id);
               return true;
-            })
-            .slice(0, 200),
-          edges: dataset.relationships.slice(0, 400),
+            }),
+          edges: dataset.relationships,
         };
 
         setDataset(cleanData);

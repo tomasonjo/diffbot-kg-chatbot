@@ -24,6 +24,7 @@ const GraphDataController: FC<
         y: Math.random(),
         tag: node.tag,
         nodeGraphType: getNodeGraphType(node.tag),
+        properties: node.properties,
         ...getNodeIcon(node.tag),
       }),
     );

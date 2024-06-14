@@ -112,10 +112,12 @@ export function drawHover(
   data: PlainObject,
   settings: PlainObject,
 ) {
+  console.log(data)
   const size = settings.labelSize;
   const font = settings.labelFont;
   const weight = settings.labelWeight;
   const subLabelSize = size - 2;
+  const propLabelSize = size - 2;
 
   const label = data.label;
   const subLabel = data.tag !== "unknown" ? data.tag : "";
@@ -138,11 +140,30 @@ export function drawHover(
 
   const x = Math.round(data.x);
   const y = Math.round(data.y);
-  const w = Math.round(textWidth + size / 2 + data.size + 3);
+  let w = Math.round(textWidth + size / 2 + data.size + 3);
   const hLabel = Math.round(size / 2 + 4);
   const hSubLabel = subLabel ? Math.round(subLabelSize / 2 + 9) : 0;
+  const hProp = 13
+  const props: string[] = [];
 
-  drawRoundRect(context, x, y - hSubLabel - 12, w, hLabel + hSubLabel + 12, 5);
+  let wProps: number[] = []
+  let hProps = 0;
+  const allowedProps = ["mentions", "sentiment", "date", "language", "processed"];
+
+  Object.entries(data.properties).forEach(entry => {
+    if (allowedProps.includes(entry[0])) {
+      const propText = `${entry[0]}: ${entry[1]}`;
+      wProps.push(context.measureText(propText).width);
+      hProps += hProp;
+      props.push(propText);
+    }
+  })
+
+  if (props.length > 0) {
+    w = Math.max(...[labelWidth, subLabelWidth, ...wProps]) + 3 + data.size + size / 2;
+  }
+
+  drawRoundRect(context, x, y - hSubLabel - 12, w, hLabel + hSubLabel + hProps + 20, 5);
   context.closePath();
   context.fill();
 
@@ -163,6 +184,18 @@ export function drawHover(
       data.x + data.size + 3,
       data.y - (2 * size) / 3 - 2,
     );
+  }
+
+  if (props.length > 0) {
+    props.forEach((prop, index) => {
+      context.fillStyle = "#555";
+      context.font = `${weight} ${propLabelSize}px ${font}`;
+      context.fillText(
+        prop,
+        data.x + data.size + 3,
+        data.y + (hProp * index) + hSubLabel + hLabel - 5,
+      );
+    })
   }
 }
 
