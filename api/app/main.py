@@ -179,7 +179,8 @@ RETURN {nodes: [n in allNodes |
                     id: coalesce(n.title, n.name, n.id),
                     tag: [el in labels(n) WHERE el <> "__Entity__"| el][0],
                     properties: n {.*, title: Null, name: Null, id: Null, date: toString(n.date),
-                                        founding_date: toString(n.founding_date), embedding: Null}
+                                        founding_date: toString(n.founding_date), embedding: Null, 
+                                        mentions: count {(n)-[:MENTIONS]-()} + 1}
                 }] ,
         relationships: [r in allRels |
                     {start: coalesce(startNode(r).title, startNode(r).name, startNode(r).id),

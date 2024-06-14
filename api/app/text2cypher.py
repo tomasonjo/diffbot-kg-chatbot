@@ -97,7 +97,10 @@ def clean_query(query: str) -> str:
 def get_function_response(
     query: str, question: str
 ) -> List[Union[AIMessage, ToolMessage]]:
-    context = graph.query(cypher_validation(clean_query(query)))
+    try:
+        context = graph.query(cypher_validation(clean_query(query)))
+    except Exception as e:
+        context = str(e)
     TOOL_ID = "call_H7fABDuzEau48T10Qn0Lsh0D"
     messages = [
         AIMessage(
