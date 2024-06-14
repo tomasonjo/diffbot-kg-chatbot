@@ -92,7 +92,7 @@ def structured_retriever(question: str) -> str:
             {"query": generate_full_text_query(entity)},
         )
         if response:
-            result += "\n".join([el["output"] for el in response])
+            result += "\n".join([el["output"] for el in response if el["output"]])
     return result
 
 
