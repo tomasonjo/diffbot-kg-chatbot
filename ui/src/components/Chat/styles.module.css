@@ -70,7 +70,6 @@
   & .mode {
     white-space: nowrap;
     font-size: 11px;
-    width: 100%;
     max-width: rem(300px);
     margin-right: var(--mantine-spacing-xs);
   }
