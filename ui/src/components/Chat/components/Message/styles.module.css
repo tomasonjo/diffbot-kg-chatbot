@@ -1,0 +1,87 @@
+.message {
+    position: relative;
+    display: flex;
+    z-index: 2;
+    min-height: rem(28px);
+}
+
+.isGenerating {
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: placeHolderShimmer;
+    animation-timing-function: linear;
+    background: linear-gradient(to right,
+            transparent 0%,
+            light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6)) 50%,
+            transparent 100%);
+    background-size: 100% 100%;
+    height: 100%;
+}
+
+@keyframes placeHolderShimmer {
+    0% {
+        background-position: -900px 0;
+    }
+
+    100% {
+        background-position: 900px 0;
+    }
+}
+
+.message :first-child {
+    margin-top: 0;
+}
+
+.message :last-child {
+    margin-bottom: 0;
+}
+
+.messageAvatar {
+    display: flex;
+    flex: 0;
+    white-space: nowrap;
+    padding-right: var(--mantine-spacing-xs);
+}
+
+.messageText {
+    flex: 1;
+    padding-top: 3px;
+
+    & pre {
+        padding: var(--mantine-spacing-xs);
+        font-family: monospace;
+        font-size: 14px;
+        border-radius: rem(3px);
+        background-color: light-dark(var(--mantine-color-gray-3),
+                var(--mantine-color-dark-4));
+    }
+
+    & code {
+        padding: rem(2px);
+        font-family: monospace;
+        font-size: 14px;
+        border-radius: rem(3px);
+        background-color: light-dark(var(--mantine-color-gray-3),
+                var(--mantine-color-dark-4));
+    }
+}
+
+.messageMeta {
+    font-size: 10px;
+    opacity: 0.5;
+}
+
+.messageContext {
+    padding: rem(5px);
+    font-size: 12px;
+    white-space: pre-wrap;
+    border-radius: rem(3px);
+        background-color: light-dark(var(--mantine-color-gray-3),
+                var(--mantine-color-dark-4));
+}

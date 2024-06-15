@@ -1,19 +1,7 @@
-import {
-  ActionIcon,
-  Button,
-  Notification,
-  Paper,
-  Textarea,
-} from "@mantine/core";
-import {
-  IconChevronRight,
-  IconMoodSmile,
-  IconRobotFace,
-  IconSend2,
-} from "@tabler/icons-react";
+import { ActionIcon, Button, Notification, Textarea } from "@mantine/core";
+import { IconSend2 } from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import Markdown from "react-markdown";
 import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
 import { ChatMessage } from "./interfaces";
@@ -23,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { refreshSchema } from "../../api";
 
 import styles from "./styles.module.css";
+import { Message } from "./components/Message";
 
 export function Chat() {
   const { retrievalMode } = globalStore();
@@ -169,10 +158,16 @@ export function Chat() {
             );
             break;
           case "graph_based_prefiltering":
-            context = ""; // TODO: include context
+            context = extractContext(
+              state?.logs?.["ChatPromptTemplate:2"]?.final_output?.messages[3]
+                .content,
+            );
             break;
           case "text2cypher":
-            context = ""; // TODO: include context
+            context = extractContext(
+              state?.logs?.["RunnableParallel<function_response>"]?.final_output
+                ?.function_response[1].content,
+            );
             break;
           default:
             context = "";
@@ -241,49 +236,16 @@ export function Chat() {
         <div className={styles.outputText} ref={outputTextRef}>
           <div>
             {messages.map((message, index) => (
-              <Paper
+              <Message
+                message={message}
+                index={index}
                 key={index}
-                mb="xs"
-                p="xs"
-                style={{
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div className={styles.message}>
-                  <div className={styles.messageAvatar}>
-                    {message.sender === "user" ? (
-                      <IconMoodSmile />
-                    ) : (
-                      <IconRobotFace />
-                    )}
-                  </div>
-                  <div className={styles.messageText}>
-                    {message.sender === "bot" && message.text.length === 0 && (
-                      <IconChevronRight
-                        size={18}
-                        style={{ marginBottom: "-3px" }}
-                      />
-                    )}
-                    <Markdown>{message.text}</Markdown>
-                    {message.mode && (
-                      <div className={styles.messageMeta}>
-                        RAG Mode:{" "}
-                        {
-                          RETRIEVAL_MODES.find(
-                            ({ name }) => name === message.mode,
-                          )?.label
-                        }
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {isGenerating &&
+                isGenerating={
+                  isGenerating &&
                   message.sender === "bot" &&
-                  index === messages.length - 1 && (
-                    <div className={styles.isGenerating}></div>
-                  )}
-              </Paper>
+                  index === messages.length - 1
+                }
+              />
             ))}
             {error && (
               <Notification
