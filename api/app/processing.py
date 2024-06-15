@@ -5,15 +5,19 @@ from langchain_experimental.graph_transformers import DiffbotGraphTransformer
 from utils import graph
 
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
+EXCLUDED_TYPES = ["Number", "Money"]
 
 diffbot_nlp = DiffbotGraphTransformer(
-    diffbot_api_key=DIFF_TOKEN, extract_types=["facts", "entities"]
+    diffbot_api_key=DIFF_TOKEN, extract_types=["facts", "entities", "sentiment"]
 )
 
 
 def process_document(text):
+    """
+    Uses diffbot graph transformer from LangChain to convert text
+    to graph document objects
+    """
     try:
-        # Assume diffbot_nlp.convert_to_graph_documents is a method that converts text to graph documents
         return diffbot_nlp.convert_to_graph_documents(
             [Document(page_content=text["text"], metadata={"id": text["id"]})]
         )
@@ -28,8 +32,9 @@ SET a.processed = True
 WITH a
 UNWIND $data AS row
 MERGE (source:`__Entity__` {id: row.id})
-SET source += row.properties
-MERGE (a)-[:MENTIONS]->(source)
+SET source += apoc.map.clean(row.properties, ["sentiment"], ["", Null])
+MERGE (a)-[m:MENTIONS]->(source)
+SET m.sentiment = toFloat(row.properties.sentiment)
 WITH source, row
 CALL apoc.create.addLabels( source, [row.type] ) YIELD node
 RETURN count(*)
@@ -55,7 +60,6 @@ RETURN count(*)
 
 
 def store_graph_documents(graph_documents):
-    EXCLUDED_TYPES = ["Number"]
     for document in graph_documents:
         # Import nodes
         graph.query(
