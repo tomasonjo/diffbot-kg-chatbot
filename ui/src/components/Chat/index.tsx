@@ -1,4 +1,10 @@
-import { ActionIcon, Button, Notification, Textarea } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Checkbox,
+  Notification,
+  Textarea,
+} from "@mantine/core";
 import { IconSend2 } from "@tabler/icons-react";
 import { RemoteRunnable } from "@langchain/core/runnables/remote";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -14,7 +20,8 @@ import styles from "./styles.module.css";
 import { Message } from "./components/Message";
 
 export function Chat() {
-  const { retrievalMode } = globalStore();
+  const { retrievalMode, includeChatHistory, setIncludeChatHistory } =
+    globalStore();
 
   const outputTextRef = useRef<HTMLDivElement | null>(null);
 
@@ -58,7 +65,7 @@ export function Chat() {
       });
 
       let payload: Record<string, any>;
-      const chatHistory = getChatHistory(messages, 3);
+      const chatHistory = includeChatHistory ? getChatHistory(messages, 3) : [];
 
       switch (mode.name) {
         case "graph_based_prefiltering":
@@ -279,6 +286,7 @@ export function Chat() {
               size="lg"
               onClick={handleSubmit}
               color="teal"
+              disabled={input.length === 0}
             >
               <IconSend2 style={{ width: "70%", height: "70%" }} stroke={1.5} />
             </ActionIcon>
@@ -288,7 +296,6 @@ export function Chat() {
           <div className={styles.mode}>
             <RetrievalModeSelector />
           </div>
-
           {retrievalMode === "text2cypher" && (
             <Button
               size="xs"
@@ -300,6 +307,14 @@ export function Chat() {
               Refresh schema
             </Button>
           )}
+          <div className={styles.chatHistory} style={{ marginLeft: "auto" }}>
+            <Checkbox
+              color="teal"
+              checked={includeChatHistory}
+              label="Include chat history"
+              onChange={() => setIncludeChatHistory(!includeChatHistory)}
+            />
+          </div>
         </div>
       </div>
     </div>
