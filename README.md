@@ -14,11 +14,13 @@ Lastly, the project uses OpenAI LLMs to provide a chat interface, which can answ
 
 1. Set environment variables in `.env`. You can find the template in `.env.template`
 
-3. Start the docker containers with
+2. Start the docker containers with
 
 ```
 docker compose up 
 ```
+
+3. Open you favorite browser on `localhost:3000`
 
 ## Contributions
 
