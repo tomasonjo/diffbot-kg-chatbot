@@ -99,6 +99,7 @@ def get_people_params(row: Dict) -> Optional[Dict]:
 person_import_query = """
     UNWIND $data AS row
     MERGE (p:Person {name: row.name})
+    ON CREATE SET p:__Entity__
     SET p += row.node_properties
     WITH p, row
     
@@ -124,13 +125,10 @@ person_import_query = """
         WITH p, row
         UNWIND row.employments AS emp
         MERGE (org:Organization {name: emp.employer})
+        ON CREATE SET org:`__Entity__`
         WITH p, org, emp
-        CALL apoc.create.relationship(
-            p, toUpper(emp.title), 
-            {isCurrent: emp.isCurrent, fromYear: emp.from, toYear: emp.to}, 
-            org
-        )
-        YIELD rel
+        MERGE (p)-[e:EMPLOYEE_OR_MEMBER_OF]->(org)
+        SET e += {positionHeld: emp.title, isCurrent: emp.isCurrent, fromYear: emp.from, toYear: emp.to}
         RETURN count(*) AS employmentCount
     }
 
