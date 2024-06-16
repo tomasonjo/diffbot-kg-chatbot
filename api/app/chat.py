@@ -87,7 +87,7 @@ def structured_retriever(question: str) -> str:
               MATCH (node)<-[r:!MENTIONS]-(neighbor)
               RETURN neighbor.name + ' - ' + type(r) + ' -> ' +  node.name AS output
             }
-            RETURN output LIMIT 50
+            RETURN output LIMIT 200
             """,
             {"query": generate_full_text_query(entity)},
         )
