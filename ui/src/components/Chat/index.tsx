@@ -165,16 +165,20 @@ export function Chat() {
             );
             break;
           case "graph_based_prefiltering":
-            context = extractContext(
-              state?.logs?.["ChatPromptTemplate:2"]?.final_output?.messages[3]
-                .content,
-            );
+            const gbpMessage =
+              state?.logs?.["ChatPromptTemplate:2"]?.final_output
+                ?.messages?.[5];
+            if (gbpMessage) {
+              context = gbpMessage.content;
+            }
             break;
           case "text2cypher":
-            context = extractContext(
+            const t2cMessage =
               state?.logs?.["RunnableParallel<function_response>"]?.final_output
-                ?.function_response[1].content,
-            );
+                ?.function_response?.[1];
+            if (t2cMessage) {
+              context = t2cMessage.content;
+            }
             break;
           default:
             context = "";

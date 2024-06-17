@@ -18,8 +18,6 @@ export function extractContext(input: string): string {
     return ""
   }
 
-  debugger;
-
   const contextRegex = /<context>([\s\S]*?)<\/context>/;
   const match = input.match(contextRegex);
 

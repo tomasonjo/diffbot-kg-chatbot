@@ -59,7 +59,7 @@ export function Message({ message, index, isGenerating }: Props) {
                 <code>{message.context}</code>
               </pre>
             </Modal>
-            <ActionIcon size="xs" onClick={open} color="gray">
+            <ActionIcon size="xs" ml="sm" onClick={open} color="gray">
               <IconCode />
             </ActionIcon>
           </>
