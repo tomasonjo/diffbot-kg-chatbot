@@ -12,11 +12,12 @@ import {
   Select,
   Notification,
   rem,
+  Alert,
 } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { importArticles } from "../../api";
 import { FormEvent, useState } from "react";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconInfoCircle, IconX } from "@tabler/icons-react";
 
 const INDUSTRY_OPTIONS = [
   { value: "", label: "None" },
@@ -41,7 +42,8 @@ const schema = z
       .min(1, { message: "You must import at least one article." }),
   })
   .refine((data) => data.query || data.tag, {
-    message: "Either 'Keyword or company' or 'Industry' or both fields must be provided.",
+    message:
+      "Either 'Keyword or company' or 'Industry' or both fields must be provided.",
     path: ["query", "tag"],
   });
 
@@ -93,6 +95,13 @@ export function ImportArticles() {
         <Title order={2} mb="lg">
           Article Importer
         </Title>
+        <Alert variant="light" color="blue" icon={<IconInfoCircle />} mb="lg">
+          The Article API from Diffbot lets you fetch real-time news efficiently
+          based on the keyword or topic you are interested in. It stores the
+          results as a lexical graph in Neo4j, which is a graph structure
+          representing the relationships between articles and corresponding text
+          chunks.
+        </Alert>
         {successMessage ? (
           <Notification
             icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}
@@ -107,9 +116,6 @@ export function ImportArticles() {
           </Notification>
         ) : (
           <>
-            <Text size="lg" mb="lg">
-              Please choose a keyword or field!
-            </Text>
             <form onSubmit={handleFormSubmit}>
               <TextInput
                 label="Keyword or company"

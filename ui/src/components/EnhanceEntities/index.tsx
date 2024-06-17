@@ -11,11 +11,12 @@ import {
   Notification,
   rem,
   Loader,
+  Alert,
 } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { enhanceEntities, getUnprocessedEntities } from "../../api";
 import { FormEvent, useState } from "react";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconInfoCircle, IconX } from "@tabler/icons-react";
 
 const schema = z.object({
   size: z.number().min(1, { message: "Minimum 1 entity." }),
@@ -74,6 +75,14 @@ export function EnhanceEntities() {
         <Title order={2} mb="lg">
           Enhance entities
         </Title>
+        <Alert variant="light" color="blue" icon={<IconInfoCircle />} mb="lg">
+          The enhance functionality allows you to enrich top mentioned existing
+          entities in the knowledge graph by adding additional information using
+          the Diffbot's Search API. At the moment, only People and Organization
+          nodes can be enriched. This flow is designed to show how easy it is to
+          combine structured and unstructured data sources using a knowledge
+          graph data representation.
+        </Alert>
         {successMessage ? (
           <Notification
             icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}

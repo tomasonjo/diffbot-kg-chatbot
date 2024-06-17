@@ -9,9 +9,15 @@ import {
   rem,
   ActionIcon,
   LoadingOverlay,
+  Alert,
 } from "@mantine/core";
 import { FormEvent, MouseEvent, useState } from "react";
-import { IconCheck, IconRefresh, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconInfoCircle,
+  IconRefresh,
+  IconX,
+} from "@tabler/icons-react";
 import { getUnprocessedArticles, processArticles } from "../../api/nlp";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -77,6 +83,13 @@ export function NaturalLanguageProcessing() {
         <Title order={2} mb="lg">
           Natural language processing
         </Title>
+        <Alert variant="light" color="blue" icon={<IconInfoCircle />} mb="lg">
+          The NLP API is designed to extract entities and relationships from the
+          articles in the graph based on the predefined graph schema.
+          Additionally, it performs entity resolution by linking entities to
+          various target knowledge bases such as Wikipedia and others. The
+          results are stored in Neo4j as an entity graph.
+        </Alert>
         {successMessage ? (
           <Notification
             icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />}

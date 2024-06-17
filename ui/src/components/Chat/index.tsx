@@ -166,8 +166,8 @@ export function Chat() {
             break;
           case "graph_based_prefiltering":
             const gbpMessage =
-              state?.logs?.["ChatPromptTemplate:2"]?.final_output
-                ?.messages?.[5];
+              state?.logs?.["RunnableParallel<question,chat_history,context>"]
+                ?.final_output?.context;
             if (gbpMessage) {
               context = gbpMessage.content;
             }
