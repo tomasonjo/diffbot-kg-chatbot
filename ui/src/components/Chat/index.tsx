@@ -165,9 +165,15 @@ export function Chat() {
             );
             break;
           case "graph_based_prefiltering":
+            console.log(
+              state?.logs?.[
+                "RunnableParallel<input,chat_history,agent_scratchpad>:2"
+              ]?.final_output?.agent_scratchpad,
+            );
             const gbpMessage =
-              state?.logs?.["RunnableParallel<question,chat_history,context>"]
-                ?.final_output?.context;
+              state?.logs?.[
+                "RunnableParallel<input,chat_history,agent_scratchpad>:2"
+              ]?.final_output?.agent_scratchpad[1];
             if (gbpMessage) {
               context = gbpMessage.content;
             }
