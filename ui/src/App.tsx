@@ -12,7 +12,7 @@ import { EnhanceEntitiesPage } from "./pages/EnhanceEntitiesPage";
 import { NaturalLanguageProcessingPage } from "./pages/NaturalLanguageProcessingPage";
 import { MantineProvider, createTheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Neo4jNetworkGraph } from "./components/NetworkGraph";
+import { NetworkGraphPage } from "./pages/NetworkGraphPage";
 
 const theme = createTheme({});
 
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
       },
       {
         path: "network-graph/",
-        element: <Neo4jNetworkGraph />,
+        element: <NetworkGraphPage />,
       },
     ],
   },

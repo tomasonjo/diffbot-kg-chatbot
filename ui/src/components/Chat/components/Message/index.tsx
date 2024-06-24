@@ -3,6 +3,7 @@ import { ActionIcon, Modal, Paper } from "@mantine/core";
 import { RETRIEVAL_MODES } from "../../../../global/constants";
 import { ChatMessage } from "../../interfaces";
 import {
+  IconAffiliate,
   IconChevronRight,
   IconCode,
   IconMoodSmile,
@@ -11,6 +12,7 @@ import {
 
 import styles from "./styles.module.css";
 import { useDisclosure } from "@mantine/hooks";
+import { Neo4jNetworkGraph } from "../../../NetworkGraph";
 
 interface Props {
   message: ChatMessage;
@@ -19,8 +21,9 @@ interface Props {
 }
 
 export function Message({ message, index, isGenerating }: Props) {
-  const [opened, { open, close }] = useDisclosure(false);
-
+  const [contextOpened, { open: contextOpen, close: contextClose }] =
+    useDisclosure(false);
+  const [kgOpened, { open: kgOpen, close: kgClose }] = useDisclosure(false);
   return (
     <Paper
       key={index}
@@ -50,8 +53,8 @@ export function Message({ message, index, isGenerating }: Props) {
         {message.context && (
           <>
             <Modal
-              opened={opened}
-              onClose={close}
+              opened={contextOpened}
+              onClose={contextClose}
               title="Context Data"
               size="xl"
             >
@@ -59,8 +62,23 @@ export function Message({ message, index, isGenerating }: Props) {
                 <code>{message.context}</code>
               </pre>
             </Modal>
-            <ActionIcon size="xs" ml="sm" onClick={open} color="gray">
+            <ActionIcon size="xs" ml="sm" onClick={contextOpen} color="gray">
               <IconCode />
+            </ActionIcon>
+          </>
+        )}
+        {message.kgData && (
+          <>
+            <Modal
+              opened={kgOpened}
+              onClose={kgClose}
+              title="KG Graph"
+              size="xl"
+            >
+              <Neo4jNetworkGraph data={message.kgData} height={400} />
+            </Modal>
+            <ActionIcon size="xs" ml="sm" onClick={kgOpen} color="gray">
+              <IconAffiliate />
             </ActionIcon>
           </>
         )}

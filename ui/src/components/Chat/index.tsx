@@ -11,7 +11,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { globalStore } from "../../global/state";
 import { RETRIEVAL_MODES } from "../../global/constants";
 import { ChatMessage } from "./interfaces";
-import { extractContext, getChatHistory } from "./utils";
+import { extractContext, extractKGData, getChatHistory } from "./utils";
 import { RetrievalModeSelector } from "./components/RetrievalModeSelector";
 import { useQuery } from "@tanstack/react-query";
 import { refreshSchema } from "../../api";
@@ -148,8 +148,10 @@ export function Chat() {
         }
       }
 
-      // retrieve context
+      // retrieve context + kg graph data
       let context = lastMessage.context ? lastMessage.context : "";
+      let kgData = lastMessage.kgData ? lastMessage.kgData : null;
+
       if (context.length === 0) {
         switch (retrievalMode) {
           case "basic_hybrid_search":
@@ -163,13 +165,12 @@ export function Chat() {
               state?.logs?.["ChatPromptTemplate:2"]?.final_output?.lc_kwargs
                 .messages[0].content,
             );
+            if (context !== "") {
+              kgData = extractKGData(context);
+              console.log("kgData", kgData);
+            }
             break;
           case "graph_based_prefiltering":
-            console.log(
-              state?.logs?.[
-                "RunnableParallel<input,chat_history,agent_scratchpad>:2"
-              ]?.final_output?.agent_scratchpad,
-            );
             const gbpMessage =
               state?.logs?.[
                 "RunnableParallel<input,chat_history,agent_scratchpad>:2"
@@ -195,6 +196,7 @@ export function Chat() {
         ...lastMessage,
         text: query + steps + output,
         context,
+        kgData,
       };
 
       return newMessages;

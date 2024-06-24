@@ -13,7 +13,6 @@ export function getChatHistory(messages: ChatMessage[], numLastExchanges = 3) {
 }
 
 export function extractContext(input: string): string {
-  console.log(input)
   if (!input) {
     return ""
   }
@@ -29,8 +28,41 @@ export function extractContext(input: string): string {
 }
 
 export function extractKGData(context: string) {
-  // TODO: improve the parsing by wrapping  prompt for unstructured data in <tags>
-  const kgData = context.split("Unstructured data:")[0].trim().replace("Strucutred data:", "")
-  console.log(kgData)
-  debugger;
+  const kgData = context.split("Unstructured data:")[0].trim().replace("Structured data:\n", "").trim().split("\n");
+
+  let n = new Set();
+  let nodes: Record<string, string>[] = [];
+  let relationships: Record<string, string>[] = []
+
+  kgData.forEach(el => {
+    const startRel = el.split(" - ");
+    const start = startRel[0];
+    const endRel = startRel[1].split(" -> ");
+    const rel = endRel[0];
+    const end = endRel[1];
+
+    if (!n.has(start)) {
+      n.add(start);
+      nodes.push({
+        id: start,
+      })
+    }
+    if (!n.has(end)) {
+      n.add(end);
+      nodes.push({
+        id: end,
+      })
+    }
+
+    relationships.push({
+      start,
+      end,
+      type: rel
+    })
+  });
+
+  return {
+    nodes: nodes,
+    relationships: relationships
+  }
 }

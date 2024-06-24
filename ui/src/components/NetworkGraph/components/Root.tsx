@@ -21,12 +21,11 @@ import { FiltersState } from "../interfaces";
 
 import styles from "../styles.module.css";
 
-
 const Fa2: FC = () => {
   const { start, stop, kill } = useWorkerLayoutForceAtlas2({
     settings: {
       gravity: 0.5,
-      adjustSizes: true
+      adjustSizes: true,
     },
   });
 
@@ -47,9 +46,12 @@ const Fa2: FC = () => {
   return null;
 };
 
+interface Props {
+  data: Record<string, any>;
+  height?: number | string;
+}
 
-
-const Root: FC = () => {
+const Root = ({ data, height = "100%" }: Props) => {
   const [dataReady, setDataReady] = useState(false);
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -72,7 +74,7 @@ const Root: FC = () => {
       labelRenderedSizeThreshold: 2,
       zIndex: true,
       renderEdgeLabels: true,
-      edgeLabelSize: 10
+      edgeLabelSize: 10,
     }),
     [],
   );
@@ -95,29 +97,25 @@ const Root: FC = () => {
 
   // Load data on mount:
   useEffect(() => {
-    apiClient
-      .get("/fetch_network/")
-      .then((res) => res.data)
-      .then((dataset: GraphNetwork) => {
-        const seenNodes = new Set();
+    if (data) {
+      const seenNodes = new Set();
 
-        const cleanData = {
-          nodes: dataset.nodes
-            .filter((item) => {
-              if (seenNodes.has(item.id)) {
-                return false;
-              }
-              seenNodes.add(item.id);
-              return true;
-            }),
-          edges: dataset.relationships,
-        };
+      const cleanData = {
+        nodes: data.nodes.filter((item: any) => {
+          if (seenNodes.has(item.id)) {
+            return false;
+          }
+          seenNodes.add(item.id);
+          return true;
+        }),
+        edges: data.relationships,
+      };
 
-        setDataset(cleanData);
+      setDataset(cleanData);
 
-        requestAnimationFrame(() => setDataReady(true));
-      });
-  }, []);
+      requestAnimationFrame(() => setDataReady(true));
+    }
+  }, [data]);
 
   if (!dataReady) return <LoadingOverlay visible={true} />;
 
@@ -125,13 +123,16 @@ const Root: FC = () => {
     <SigmaContainer
       graph={DirectedGraph}
       settings={sigmaSettings}
-      style={{ height: "100%" }}
+      style={{ height: height ? `${height}px` : "100%" }}
       className="react-sigma"
     >
       <Fa2 />
       <GraphSettingsController hoveredNode={hoveredNode} />
       <GraphEventsController setHoveredNode={setHoveredNode} />
-      <GraphDataController dataset={dataset as Dataset} filters={filtersState} />
+      <GraphDataController
+        dataset={dataset as Dataset}
+        filters={filtersState}
+      />
       <ControlsContainer position={"top-left"}>
         <div className={styles.filters}>
           <Button
@@ -139,7 +140,9 @@ const Root: FC = () => {
             color="teal"
             onClick={() => handleGraphFilterClick("lexical")}
             style={{
-              opacity: filtersState.visibleNodeGraphTypes.includes("lexical") ? "1" : "0.5",
+              opacity: filtersState.visibleNodeGraphTypes.includes("lexical")
+                ? "1"
+                : "0.5",
             }}
           >
             Lexical graph
@@ -147,7 +150,9 @@ const Root: FC = () => {
           <Button
             size="xs"
             style={{
-              opacity: filtersState.visibleNodeGraphTypes.includes("entity") ? "1" : "0.5",
+              opacity: filtersState.visibleNodeGraphTypes.includes("entity")
+                ? "1"
+                : "0.5",
             }}
             ml="xs"
             color="teal"
@@ -160,7 +165,10 @@ const Root: FC = () => {
       <ControlsContainer position={"top-right"}>
         <SearchControl style={{ width: "200px" }} />
       </ControlsContainer>
-      <ControlsContainer position={"bottom-right"} className={styles.zoomControl}>
+      <ControlsContainer
+        position={"bottom-right"}
+        className={styles.zoomControl}
+      >
         <ZoomControl />
         <FullScreenControl />
       </ControlsContainer>

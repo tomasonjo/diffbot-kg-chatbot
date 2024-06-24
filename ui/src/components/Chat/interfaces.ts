@@ -3,4 +3,5 @@ export interface ChatMessage {
   text: string;
   context?: string;
   mode?: string;
+  kgData?: Record<string, any> | null;
 }
