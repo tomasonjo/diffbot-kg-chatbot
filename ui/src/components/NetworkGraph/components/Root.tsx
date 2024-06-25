@@ -10,13 +10,12 @@ import { DirectedGraph } from "graphology";
 import { FC, useEffect, useMemo, useState } from "react";
 import { Settings } from "sigma/settings";
 import { drawHover, drawLabel } from "../utils";
-import { Dataset, GraphNetwork } from "../interfaces";
+import { Dataset } from "../interfaces";
 import { useWorkerLayoutForceAtlas2 } from "@react-sigma/layout-forceatlas2";
 import GraphDataController from "./GraphDataController";
 import GraphEventsController from "./GraphEventsController";
 import GraphSettingsController from "./GraphSettingsController";
 import { Button, LoadingOverlay } from "@mantine/core";
-import { apiClient } from "../../../api";
 import { FiltersState } from "../interfaces";
 
 import styles from "../styles.module.css";
