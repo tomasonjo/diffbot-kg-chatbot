@@ -4,9 +4,9 @@ This project is designed to show an end-to-end pipeline for constructing knowled
 
 The project uses Neo4j, a graph database, to store the knowledge graph and Diffbot as the data provider. Diffbot offers various data integrations on its platform, such as:
 
-Latest or relevant news about a specific topic or company
-Extracting graph information from text
-Enriching organization or personal information
+* Latest or relevant news about a specific topic or company
+* Extracting graph information from text
+* Enriching organization or personal information
 
 Lastly, the project uses OpenAI LLMs to provide a chat interface, which can answer questions based on the provided information from the knowledge graph.
 
