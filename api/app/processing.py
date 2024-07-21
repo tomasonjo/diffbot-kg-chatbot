@@ -52,7 +52,7 @@ RETURN count(*)
 
 merge_entities = """
 MATCH (p:Organization|Person)
-WITH p.name AS name, collect(p) AS nodes
+WITH toLower(p.name) AS name, collect(p) AS nodes
 WHERE size(nodes) > 1
 CALL apoc.refactor.mergeNodes(nodes) YIELD node
 RETURN count(*)
