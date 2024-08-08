@@ -171,7 +171,7 @@ def get_organization_params(name: str, row: Dict) -> Dict:
     investments = [
         {
             "id": f"{name}-{index}",
-            "series": el["series"],
+            "series": el.get("series"),
             "amount": el.get("amount", {}).get("value"),
             "investors": [
                 {"name": i["name"], "type": i.get("type")}
