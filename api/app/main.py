@@ -138,8 +138,6 @@ async def enhance_entities(entity_data: EntityData) -> str:
     )
     enhanced_data = {}
 
-    # Run the process_entities function in a TaskGroup
-
     queue = asyncio.Queue()
     for row in entities:
         for el in row["entities"]:
@@ -154,14 +152,11 @@ async def enhance_entities(entity_data: EntityData) -> str:
             finally:
                 queue.task_done()
 
-    tasks = []
-    for _ in range(4):  # Number of workers
-        tasks.append(asyncio.create_task(worker()))
+    async with asyncio.TaskGroup() as tg:
+        for _ in range(MAX_WORKERS):  # Number of workers
+            tg.create_task(worker())
 
     await queue.join()
-
-    for task in tasks:
-        task.cancel()
 
     store_enhanced_data(enhanced_data)
     return "Finished enhancing entities."
