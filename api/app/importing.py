@@ -1,8 +1,8 @@
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-import requests
+from diffbot_kg import DiffbotSearchClient
 from utils import embeddings, text_splitter
 
 CATEGORY_THRESHOLD = 0.50
@@ -10,24 +10,31 @@ params = []
 
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
+client = DiffbotSearchClient(token=DIFF_TOKEN)
 
-def get_articles(
-    query: Optional[str], tag: Optional[str], size: int = 5, offset: int = 0
-) -> Dict[str, Any]:
+
+async def get_articles(
+    query: Optional[str],
+    tag: Optional[str],
+    size: int = 5,
+    offset: int = 0,
+) -> List[Dict]:
     """
     Fetch relevant articles from Diffbot KG endpoint
     """
+    search_query = "type:Article language:en sortBy:date"
+    if query:
+        search_query += f' strict:text:"{query}"'
+    if tag:
+        search_query += f' tags.label:"{tag}"'
+
+    params = {"query": search_query, "size": size, "offset": offset}
+
+    logging.info(f"Fetching articles with params: {params}")
+
     try:
-        search_host = "https://kg.diffbot.com/kg/v3/dql?"
-        search_query = f'query=type%3AArticle+strict%3Alanguage%3A"en"+sortBy%3Adate'
-        if query:
-            search_query += f'+text%3A"{query}"'
-        if tag:
-            search_query += f'+tags.label%3A"{tag}"'
-        url = (
-            f"{search_host}{search_query}&token={DIFF_TOKEN}&from={offset}&size={size}"
-        )
-        return requests.get(url).json()
+        response = await client.search(params)
+        return response.entities
     except Exception as ex:
         raise ex
 
