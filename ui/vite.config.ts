@@ -20,5 +20,11 @@ export default defineConfig({
     },
     cors: false,
   },
+  optimizeDeps: {
+    exclude: [
+      'chunk-QZIGV62A.js?v=fa23f911',
+      'chunk-DYQIOKDO.js?v=fa23f911',
+    ],
+  },
   plugins: [react()],
 });
