@@ -22,6 +22,7 @@ logging.basicConfig(
 
 # Multithreading for Diffbot API
 MAX_WORKERS = min((os.cpu_count() or 1) * 5, 20)
+MAX_TASKS = 20
 
 app = FastAPI()
 
@@ -146,14 +147,17 @@ async def enhance_entities(entity_data: EntityData) -> str:
     async def worker():
         while True:
             el, label = await queue.get()
+            logging.info("Processing entity: %s", el)
             try:
                 response = await process_entities(el, label)
                 enhanced_data[response[0]] = response[1]
             finally:
+                logging.info("Processed: %s", el)
                 queue.task_done()
 
+    num_workers = min(queue.qsize(), MAX_TASKS)
     async with asyncio.TaskGroup() as tg:
-        for _ in range(MAX_WORKERS):  # Number of workers
+        for _ in range(num_workers):  # Number of workers
             tg.create_task(worker())
 
     await queue.join()
