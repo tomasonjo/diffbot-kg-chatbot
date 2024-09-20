@@ -1,10 +1,8 @@
-import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urlencode
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
-import requests
+from diffbot_kg import DiffbotEnhanceClient
 from utils import graph
 
 CATEGORY_THRESHOLD = 0.50
@@ -12,6 +10,7 @@ params = []
 
 DIFF_TOKEN = os.environ["DIFFBOT_API_KEY"]
 
+client = DiffbotEnhanceClient(DIFF_TOKEN)
 
 def get_datetime(value: Optional[Union[str, int, float]]) -> datetime:
     if not value:
@@ -19,15 +18,15 @@ def get_datetime(value: Optional[Union[str, int, float]]) -> datetime:
     return datetime.fromtimestamp(float(value) / 1000.0)
 
 
-def process_entities(entity: str, type: str) -> Dict[str, Any]:
+
+async def process_entities(entity: str, type: str) -> Tuple[str, List[Dict]]:
     """
     Fetch relevant articles from Diffbot KG endpoint
     """
-    search_host = "https://kg.diffbot.com/kg/v3/enhance?"
-    params = {"type": type, "name": entity, "token": DIFF_TOKEN}
-    encoded_query = urlencode(params)
-    url = f"{search_host}{encoded_query}"
-    return entity, requests.get(url).json()
+    params = {"type": type, "name": entity}
+    response = await client.enhance(params)
+
+    return entity, response.entities
 
 
 def get_people_params(row: Dict) -> Optional[Dict]:

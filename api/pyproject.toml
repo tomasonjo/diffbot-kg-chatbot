@@ -20,6 +20,7 @@ langchain-openai = "^0.1.8"
 langchain-text-splitters = "^0.2.1"
 tiktoken = "^0.7.0"
 langchain-experimental = "^0.0.61"
+diffbot-kg = "^0.2.4"
 
 
 [tool.poetry.group.dev.dependencies]

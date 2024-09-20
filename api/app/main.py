@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -20,7 +21,8 @@ logging.basicConfig(
 )
 
 # Multithreading for Diffbot API
-MAX_WORKERS = min(os.cpu_count() * 5, 20)
+MAX_WORKERS = min((os.cpu_count() or 1) * 5, 20)
+MAX_TASKS = 20
 
 app = FastAPI()
 
@@ -35,21 +37,24 @@ app.add_middleware(
 
 
 @app.post("/import_articles/")
-def import_articles_endpoint(article_data: ArticleData) -> int:
+async def import_articles_endpoint(article_data: ArticleData) -> int:
     logging.info(f"Starting to process article import with params: {article_data}")
-    if not article_data.query and not article_data.tag:
+    if not article_data.query and not article_data.category and not article_data.tag:
         raise HTTPException(
-            status_code=500, detail="Either `query` or `tag` must be provided"
+            status_code=500,
+            detail="Either `query` or `category` or `tag` must be provided",
         )
-    data = get_articles(article_data.query, article_data.tag, article_data.size)
-    logging.info(f"Articles fetched: {len(data['data'])} articles.")
+    articles = await get_articles(
+        article_data.query, article_data.category, article_data.tag, article_data.size
+    )
+    logging.info(f"Articles fetched: {len(articles)} articles.")
     try:
-        params = process_params(data)
+        params = process_params(articles)
     except Exception as e:
         # You could log the exception here if needed
-        raise HTTPException(status_code=500, detail=e)
+        raise HTTPException(status_code=500, detail=e) from e
     graph.query(import_cypher_query, params={"data": params})
-    logging.info(f"Article import query executed successfully.")
+    logging.info("Article import query executed successfully.")
     return len(params)
 
 
@@ -124,7 +129,7 @@ def fetch_unprocessed_count(count_data: CountData) -> int:
 
 
 @app.post("/enhance_entities/")
-def enhance_entities(entity_data: EntityData) -> str:
+async def enhance_entities(entity_data: EntityData) -> str:
     entities = graph.query(
         "MATCH (a:Person|Organization) WHERE a.processed IS NULL "
         "WITH a LIMIT toInteger($limit) "
@@ -132,18 +137,32 @@ def enhance_entities(entity_data: EntityData) -> str:
         "AS label, collect(a.name) AS entities",
         params={"limit": entity_data.size},
     )
-    enhanced_data = []
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # Submitting all tasks and creating a list of future objects
-        for row in entities:
-            futures = [
-                executor.submit(process_entities, el, row["label"])
-                for el in row["entities"]
-            ]
+    enhanced_data = {}
 
-            for future in futures:
-                response = future.result()
-                enhanced_data.append(response)
+    queue = asyncio.Queue()
+    for row in entities:
+        for el in row["entities"]:
+            await queue.put((el, row["label"]))
+
+    async def worker():
+        while True:
+            el, label = await queue.get()
+            logging.info("Processing entity: %s", el)
+            try:
+                response = await process_entities(el, label)
+                enhanced_data[response[0]] = response[1]
+            finally:
+                logging.info("Processed: %s", el)
+                queue.task_done()
+
+    num_workers = min(queue.qsize(), MAX_TASKS)
+    workers = [asyncio.create_task(worker()) for _ in range(num_workers)]
+    await queue.join()
+
+    for w in workers:
+        w.cancel()
+    await asyncio.gather(*workers, return_exceptions=True)
+
     store_enhanced_data(enhanced_data)
     return "Finished enhancing entities."
 
