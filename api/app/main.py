@@ -156,11 +156,12 @@ async def enhance_entities(entity_data: EntityData) -> str:
                 queue.task_done()
 
     num_workers = min(queue.qsize(), MAX_TASKS)
-    async with asyncio.TaskGroup() as tg:
-        for _ in range(num_workers):  # Number of workers
-            tg.create_task(worker())
-
+    workers = [asyncio.create_task(worker()) for _ in range(num_workers)]
     await queue.join()
+
+    for w in workers:
+        w.cancel()
+    await asyncio.gather(*workers, return_exceptions=True)
 
     store_enhanced_data(enhanced_data)
     return "Finished enhancing entities."
